@@ -1,0 +1,14 @@
+version: '2'
+services:
+  webapp:
+    container_name: spam-detection
+    build:
+      context: ./
+      dockerfile: Dockerfile-PHP
+    volumes:
+      - "../../:/var/www/html/"
+    privileged: true
+    working_dir: /var/www/html
+    command: sleep 10000000
+
+
