@@ -2,7 +2,7 @@
 
 namespace Jawabkom\Backend\Module\Spam\Detection\Contract\Entity;
 
-interface IPhoneSpamScoreEntity
+interface ISpamPhoneScoreEntity
 {
     public function getPhone():string;
     public function getSource():string;
