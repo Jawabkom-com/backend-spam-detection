@@ -5,7 +5,6 @@ namespace Jawabkom\Backend\Module\Spam\Detection\Test\Unit;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\InputFilter\SpamPhoneScoreInputsFilter;
-use Jawabkom\Backend\Module\Spam\Detection\InputValidator\SpamPhoneScoreInputsValidator;
 use Jawabkom\Backend\Module\Spam\Detection\Test\AbstractTestCase;
 
 /**

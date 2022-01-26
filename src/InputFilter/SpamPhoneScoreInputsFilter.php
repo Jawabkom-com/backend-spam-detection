@@ -5,6 +5,7 @@ namespace Jawabkom\Backend\Module\Spam\Detection\InputFilter;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\InputFilter\IInputFilter;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
+use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
 
 class SpamPhoneScoreInputsFilter implements IInputFilter
 {
