@@ -8,7 +8,10 @@ use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 
 class SpamPhoneScoreInputsValidator implements IInputValidator
 {
-
+    /**
+     * @throws RequiredInputsException
+     * @throws RequiredPhoneException
+     */
     public function validate(array $inputs): bool
     {
         if(!isset($inputs['phone'])) {

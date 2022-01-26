@@ -9,6 +9,15 @@ use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
 
 class SpamPhoneScoreInputsFilter implements IInputFilter
 {
+    private Phone $phoneLib;
+
+    /**
+     * @param Phone $phoneLib
+     */
+    public function __construct(Phone $phoneLib)
+    {
+        $this->phoneLib = $phoneLib;
+    }
     /**
      * @throws RequiredInputsException
      * @throws RequiredPhoneException
@@ -18,6 +27,8 @@ class SpamPhoneScoreInputsFilter implements IInputFilter
         if(empty($inputs)) throw new RequiredInputsException();
         if(!isset($inputs['phone'])) throw new RequiredPhoneException();
 
-        return $inputs;
+        $result = [];
+        $result['normalizedPhone'] =  $this->phoneLib->parse($inputs['phone']);
+        return $result;
     }
 }
