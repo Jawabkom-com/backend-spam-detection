@@ -21,7 +21,7 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
     /**
      * @throws RequiredPhoneException
      */
-    public function testSpamPhoneScoreInputs_ThrowRequiredInputsException() {
+    public function test_Validate_WhenCalledWithEmpty_MustThrowRequiredInputsException() {
         $this->expectException(RequiredInputsException::class);
         $inputs = [
             'phone' => '', // required
@@ -37,7 +37,7 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
     /**
      * @throws RequiredInputsException
      */
-    public function testSpamPhoneScoreInputs_PhoneIsRequired() {
+    public function test_Validate_WhenCalledWithEmptyPhone_MustThrowPhoneIsRequiredException() {
         $this->expectException(RequiredPhoneException::class);
         $inputs = [
             'source' => '', // required
