@@ -24,7 +24,7 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
     /**
      * @throws RequiredPhoneException
      */
-    public function testMustThrowExceptionIfInputsAreEmpty() {
+    public function test_SpamPhoneScore_WhenEmptyInputsArray_MustThrowException() {
         $this->expectException(RequiredInputsException::class);
         $inputs = [];
         $this->filterService->filter($inputs);
@@ -33,7 +33,7 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
     /**
      * @throws RequiredInputsException
      */
-    public function testMustThrowExceptionIfPhoneIsEmpty() {
+    public function test_SpamPhoneScore_WhenEmptyPhoneInput_MustThrowException() {
         $this->expectException(RequiredPhoneException::class);
         $inputs = [
             'source' => '', // required
@@ -48,7 +48,7 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
      * @throws RequiredInputsException
      * @throws RequiredPhoneException
      */
-    public function testMustFilterPhoneToAProperFormat()
+    public function test_SpamPhoneScore_WhenCalledWithPhone_MustFilterToAProperFormat()
     {
         $inputs = [
             'phone' => '+970599189357',
@@ -64,7 +64,7 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
      * @throws RequiredInputsException
      * @throws RequiredPhoneException
      */
-    public function testMustFilterPhoneWithZeroPrefixToAProperFormat()
+    public function test_SpamPhoneScore_WhenCalledWithZeroPrefixPhone_MustFilterToAProperFormat()
     {
         $inputs = [
             'phone' => '00970599189357',
@@ -80,7 +80,7 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
      * @throws RequiredInputsException
      * @throws RequiredPhoneException
      */
-    public function testMustFilterPhoneWithCountryCodeAndNoPrefixToAProperFormat()
+    public function test_SpamPhoneScore_WhenCalledWithCountryCodeAndNoPrefixPhone_MustFilterToAProperFormat()
     {
         $inputs = [
             'phone' => '0599189357',
@@ -96,7 +96,7 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
      * @throws RequiredInputsException
      * @throws RequiredPhoneException
      */
-    public function testCountryCodeShouldBeTwoLetters()
+    public function test_SpamPhoneScore_WhenCalledWithCountryCode_ShouldReturnsTwoLetters()
     {
         $inputs = [
             'phone' => '+970599189357',

@@ -43,7 +43,7 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
             'source' => '', // required
             'country_code' => '', // required, valid country code, 2 letters
             'score' => 0,  // 0 - 100
-            'tags' => [], // one dimintional array of strings, or empty
+            'tags' => [], // one dimensional array of strings, or empty
         ];
 
         $this->inputValidator->validate($inputs);
