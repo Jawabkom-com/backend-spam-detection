@@ -28,7 +28,7 @@ class SpamPhoneScoreInputsFilter implements IInputFilter
         if(!isset($inputs['phone'])) throw new RequiredPhoneException();
 
         $result = [];
-        $result['normalizedPhone'] =  $this->phoneLib->parse($inputs['phone']);
+        $result['normalizedPhone'] =  $this->phoneLib->parse($inputs['phone'], [$inputs['country_code']]);
         return $result;
     }
 }

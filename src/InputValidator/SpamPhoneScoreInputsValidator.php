@@ -18,5 +18,6 @@ class SpamPhoneScoreInputsValidator implements IInputValidator
             throw new RequiredPhoneException();
         }
         throw new RequiredInputsException();
+
     }
 }

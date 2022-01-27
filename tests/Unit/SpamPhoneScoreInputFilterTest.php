@@ -51,11 +51,59 @@ class SpamPhoneScoreInputFilterTest extends AbstractTestCase
     public function testMustFilterPhoneToAProperFormat()
     {
         $inputs = [
-            'phone' => '+970599189357'
+            'phone' => '+970599189357',
+            'country_code'=> ''
         ];
         $filteredInputs = $this->filterService->filter($inputs);
         $this->assertEquals($filteredInputs['normalizedPhone']['phone'], $inputs['phone']);
         $this->assertTrue($filteredInputs['normalizedPhone']['is_valid']);
         $this->assertEquals('PS', $filteredInputs['normalizedPhone']['country_code']);
+    }
+
+    /**
+     * @throws RequiredInputsException
+     * @throws RequiredPhoneException
+     */
+    public function testMustFilterPhoneWithZeroPrefixToAProperFormat()
+    {
+        $inputs = [
+            'phone' => '00970599189357',
+            'country_code' => ''
+        ];
+        $filteredInputs = $this->filterService->filter($inputs);
+        $this->assertEquals('+970599189357', $filteredInputs['normalizedPhone']['phone']);
+        $this->assertTrue($filteredInputs['normalizedPhone']['is_valid']);
+        $this->assertEquals('PS', $filteredInputs['normalizedPhone']['country_code']);
+    }
+
+    /**
+     * @throws RequiredInputsException
+     * @throws RequiredPhoneException
+     */
+    public function testMustFilterPhoneWithCountryCodeAndNoPrefixToAProperFormat()
+    {
+        $inputs = [
+            'phone' => '0599189357',
+            'country_code' => 'PS'
+        ];
+        $filteredInputs = $this->filterService->filter($inputs);
+        $this->assertEquals('+970599189357', $filteredInputs['normalizedPhone']['phone']);
+        $this->assertTrue($filteredInputs['normalizedPhone']['is_valid']);
+        $this->assertEquals('PS', $filteredInputs['normalizedPhone']['country_code']);
+    }
+
+    /**
+     * @throws RequiredInputsException
+     * @throws RequiredPhoneException
+     */
+    public function testCountryCodeShouldBeTwoLetters()
+    {
+        $inputs = [
+            'phone' => '+970599189357',
+            'country_code' => 'Palestine'
+        ];
+
+        $filteredInputs = $this->filterService->filter($inputs);
+        $this->assertEquals(2, strlen($filteredInputs['normalizedPhone']['country_code']));
     }
 }
