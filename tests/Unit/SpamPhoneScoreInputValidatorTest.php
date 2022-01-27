@@ -4,6 +4,7 @@ namespace Jawabkom\Backend\Module\Spam\Detection\Test\Unit;
 
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\ScoreNotValidException;
 use Jawabkom\Backend\Module\Spam\Detection\InputValidator\SpamPhoneScoreInputsValidator;
 use Jawabkom\Backend\Module\Spam\Detection\Test\AbstractTestCase;
 
@@ -50,5 +51,19 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
         $this->inputValidator->validate($inputs);
     }
 
-    //public function test_Validate_WhenCalledWithFullInputs_Must
+    /**
+     * @throws RequiredInputsException
+     * @throws RequiredPhoneException
+     */
+    public function test_Validate_WhenCalledWithInvalidScore_MustThrowScoreException()
+    {
+        $this->expectException(ScoreNotValidException::class);
+
+        $inputs = [
+            'phone' => '+970599189357',
+            'score'=> -10
+        ];
+
+        $this->inputValidator->validate($inputs);
+    }
 }
