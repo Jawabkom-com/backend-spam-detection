@@ -12,7 +12,7 @@ class SpamPhoneScoreInputsValidator implements IInputValidator
      * @throws RequiredInputsException
      * @throws RequiredPhoneException
      */
-    public function validate(array $inputs): bool
+    public function validate(array $inputs)
     {
         if(!isset($inputs['phone'])) {
             throw new RequiredPhoneException();
