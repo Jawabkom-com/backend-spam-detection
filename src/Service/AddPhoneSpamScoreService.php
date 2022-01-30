@@ -2,51 +2,30 @@
 
 namespace Jawabkom\Backend\Module\Spam\Detection\Service;
 
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IAddPhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Standard\Abstract\AbstractService;
 use SleekDB\Store;
 
-class AddPhoneSpamScoreService implements IAddPhoneSpamScoreService
+class AddPhoneSpamScoreService extends AbstractService implements IAddPhoneSpamScoreService
 {
-    private $input = [];
-    private $output = [];
-
     public function process(): static
     {
-        $store = new Store('phone_spam_scores', __DIR__ .'/../../tests/tmp', ['timeout' => false]);
+        $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
+        $phoneEntity->setPhone($this->getInput('phone'));
+        $phoneEntity->setSource($this->getInput('source'));
+        $phoneEntity->setCountryCode($this->getInput('country_code'));
+        $phoneEntity->setScore($this->getInput('score'));
+        $phoneEntity->setTags($this->getInput('tags'));
 
-        if($this->missingInput()) throw new RequiredInputsException('Input missing');
+        $phoneRepo = $this->di->make(ISpamPhoneScoreRepository::class);
+        $phoneRepo->saveEntity($phoneEntity);
 
-        $record = $store->insert($this->input);
-        $this->output['result'] = $record;
+        $this->setOutput('result', $phoneEntity);
+
         return $this;
     }
 
-    private function missingInput():bool
-    {
-        if(empty($this->input['phone'])) return true;
-        return false;
-    }
-    public function input(string $key, mixed $value): static
-    {
-        $this->input[$key] = $value;
-        return $this;
-    }
-
-    public function inputs(array $inputs): static
-    {
-        $this->input = array_merge($this->input, $inputs);
-        return $this;
-    }
-
-    public function output(string $key): mixed
-    {
-        return $this->output[$key] ?? null;
-    }
-
-    public function outputs(): array
-    {
-        return $this->output;
-    }
 }

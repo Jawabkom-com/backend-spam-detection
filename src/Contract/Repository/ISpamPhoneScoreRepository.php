@@ -4,7 +4,7 @@ namespace Jawabkom\Backend\Module\Spam\Detection\Contract\Repository;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 
-interface IPhoneSpamScoreRepository
+interface ISpamPhoneScoreRepository
 {
     public function saveEntity(ISpamPhoneScoreEntity $entity):void;
 }
