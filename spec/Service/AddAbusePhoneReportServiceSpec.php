@@ -50,6 +50,62 @@ class AddAbusePhoneReportServiceSpec extends ObjectBehavior
             ->output('result');
 
         $result->shouldBeAnInstanceOf(IAbusePhoneReportEntity::class);
+        $result->getReporterId()->shouldBe('123');
+        $result->getAbuseType()->shouldBe('spam');
+        $result->getPhone()->shouldBe('+962788208263');
+        $result->getPhoneCountryCode()->shouldBe('JO');
+        $result->getTags()->shouldHaveCount(1);
     }
 
+    public function it_should_autofill_the_country_code_if_the_phone_number_is_normalized()
+    {
+        $result = $this
+            ->inputs([
+                'reporter_id' => '123',
+                'abuse_type' => 'spam',
+                'phone' => '+962788208263',
+                'phone_country_code' => 'SA',
+                'tags' => ['business']
+            ])
+            ->process()
+            ->output('result')
+            ->getPhoneCountryCode()->shouldBe('JO');
+    }
+
+    public function it_should_auto_format_the_phone_number_if_the_phone_number_is_not_normalized()
+    {
+        $result = $this
+            ->inputs([
+                'reporter_id' => '123',
+                'abuse_type' => 'spam',
+                'phone' => '0788208263',
+                'phone_country_code' => 'JO',
+                'tags' => ['business']
+            ])
+            ->process()
+            ->output('result')
+            ->getPhone()->shouldBe('+962788208263');
+    }
+
+
+    public function it_should_trim_all_inputs_if_all_inputs_provided_with_spaces()
+    {
+        $result = $this
+            ->inputs([
+                'reporter_id' => '    123   ',
+                'abuse_type' => '    spam    ',
+                'phone' => '    +962788208263    ',
+                'phone_country_code' => '    JO    ',
+                'tags' => ['    business    ']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->shouldBeAnInstanceOf(IAbusePhoneReportEntity::class);
+        $result->getReporterId()->shouldBe('123');
+        $result->getAbuseType()->shouldBe('spam');
+        $result->getPhone()->shouldBe('+962788208263');
+        $result->getPhoneCountryCode()->shouldBe('JO');
+        $result->getTags()->offsetGet(0)->shouldBe('business');
+    }
 }

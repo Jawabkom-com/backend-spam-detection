@@ -12,6 +12,6 @@ class DummyAbusePhoneReportRepository implements IAbusePhoneReportRepository
 
     public function saveEntity(IAbusePhoneReportEntity $entity): void
     {
-        static::$DB[md5($entity->getPhone().$entity->getReporterId())] = $entity;
+        static::$DB[md5($entity->getReporterId().'-'.$entity->getPhoneCountryCode().'-'.$entity->getPhone())] = $entity;
     }
 }
