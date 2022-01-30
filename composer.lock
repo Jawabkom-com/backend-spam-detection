@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bef4ae6cef298a9c1971ce50702e6dbf",
+    "content-hash": "b66e30d4d0ea69e312b119c23335aa81",
     "packages": [
         {
             "name": "brick/phonenumber",
@@ -3726,16 +3726,16 @@
         },
         {
             "name": "wablab-com/di",
-            "version": "0.0.0",
+            "version": "0.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wablab-com/di.git",
-                "reference": "c7acd86fbb0ce78f7a411a21746498259559eaf8"
+                "reference": "6f68ea641439edb2cf16c48099c9dc6c5044411b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wablab-com/di/zipball/c7acd86fbb0ce78f7a411a21746498259559eaf8",
-                "reference": "c7acd86fbb0ce78f7a411a21746498259559eaf8",
+                "url": "https://api.github.com/repos/wablab-com/di/zipball/6f68ea641439edb2cf16c48099c9dc6c5044411b",
+                "reference": "6f68ea641439edb2cf16c48099c9dc6c5044411b",
                 "shasum": ""
             },
             "require": {
@@ -3760,9 +3760,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wablab-com/di/issues",
-                "source": "https://github.com/wablab-com/di/tree/0.0.0"
+                "source": "https://github.com/wablab-com/di/tree/0.0.1"
             },
-            "time": "2022-01-22T10:15:40+00:00"
+            "time": "2022-01-30T13:28:40+00:00"
         }
     ],
     "aliases": [],
