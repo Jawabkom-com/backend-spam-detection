@@ -2,6 +2,7 @@
 
 namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Service\AddAbusePhoneReportService;
 use Jawabkom\Backend\Module\Spam\Detection\Service\AddPhoneSpamScoreService;
 use PhpSpec\ObjectBehavior;
@@ -23,4 +24,10 @@ class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
             'tags' => []
         ])->process()->output('result')->shouldHaveKeyWithValue('phone', '+970599189357');
     }
+
+    function it_should_throw_exception_if_any_input_is_missing()
+    {
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
+    }
+
 }
