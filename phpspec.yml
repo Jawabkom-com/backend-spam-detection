@@ -1,0 +1,4 @@
+suites:
+  jawabkom_suite:
+    namespace: Jawabkom\Backend\Module\Spam\Detection
+    psr4_prefix: Jawabkom\Backend\Module\Spam\Detection

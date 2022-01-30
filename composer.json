@@ -10,7 +10,8 @@
     "require": {
         "php": ">=8.0",
         "jawabkom-com/jawabkom-standards": "^0.0.0",
-        "brick/phonenumber": "^0.4.0"
+        "brick/phonenumber": "^0.4.0",
+        "phpspec/phpspec": "^7.1"
     },
     "autoload": {
         "psr-4": {
