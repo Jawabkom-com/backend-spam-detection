@@ -2,8 +2,10 @@
 
 namespace Jawabkom\Backend\Module\Spam\Detection\Test\Unit;
 
+use Jawabkom\Backend\Module\Spam\Detection\Exception\InvalidCountryCodeException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\InvalidScoreException;
 use Jawabkom\Backend\Module\Spam\Detection\InputValidator\SpamPhoneScoreInputsValidator;
 use Jawabkom\Backend\Module\Spam\Detection\Test\AbstractTestCase;
 
@@ -19,7 +21,9 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
     }
 
     /**
+     * @throws InvalidCountryCodeException
      * @throws RequiredPhoneException
+     * @throws InvalidScoreException
      */
     public function test_Validate_WhenCalledWithEmpty_MustThrowRequiredInputsException() {
         $this->expectException(RequiredInputsException::class);
@@ -28,16 +32,19 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
             'source' => '', // required
             'country_code' => '', // required, valid country code, 2 letters
             'score' => 0,  // 0 - 100
-            'tags' => [], // one dimintional array of strings, or empty
+            'tags' => [], // one dimensional array of strings, or empty
         ];
 
         $this->inputValidator->validate($inputs);
     }
 
     /**
+     * @throws InvalidCountryCodeException
+     * @throws InvalidScoreException
      * @throws RequiredInputsException
      */
-    public function test_Validate_WhenCalledWithEmptyPhone_MustThrowPhoneIsRequiredException() {
+    public function test_Validate_WhenCalledWithEmptyPhone_MustThrowPhoneIsRequiredException()
+    {
         $this->expectException(RequiredPhoneException::class);
         $inputs = [
             'source' => '', // required
@@ -47,6 +54,40 @@ class SpamPhoneScoreInputValidatorTest extends AbstractTestCase
         ];
 
         $this->inputValidator->validate($inputs);
+    }
 
+    /**
+     * @throws RequiredPhoneException
+     * @throws InvalidCountryCodeException
+     * @throws RequiredInputsException
+     */
+    public function test_Validate_WhenCalledWithInvalidScore_MustThrowScoreException()
+    {
+        $this->expectException(InvalidScoreException::class);
+
+        $inputs = [
+            'phone' => '+970599189357',
+            'score'=> -10
+        ];
+
+        $this->inputValidator->validate($inputs);
+    }
+
+    /**
+     * @throws RequiredPhoneException
+     * @throws InvalidScoreException
+     * @throws RequiredInputsException
+     */
+    public function test_Validate_WhenCalledWithInvalidCountryCode_MustThrowCountryCodeException()
+    {
+        $this->expectException(InvalidCountryCodeException::class);
+
+        $inputs = [
+            'phone' => '+970599189357',
+            'score'=> 10,
+            'country_code' => null
+        ];
+
+        $this->inputValidator->validate($inputs);
     }
 }
