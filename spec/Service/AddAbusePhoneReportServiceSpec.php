@@ -9,20 +9,20 @@ use PhpSpec\ObjectBehavior;
 
 class AddAbusePhoneReportServiceSpec extends ObjectBehavior
 {
-    function it_is_initializable()
-    {
-        $this->shouldHaveType(AddAbusePhoneReportService::class);
-    }
-
-    function it_should_create_abuse_report_if_all_inputs_provided(IAbusePhoneReportRepository $repository)
-    {
-        $this
-            ->inputs([
-
-            ])
-            ->output('result')
-            ->shouldBeAnInstanceOf(IAbusePhoneReportEntity::class);
-    }
+//    function it_is_initializable()
+//    {
+//        $this->shouldHaveType(AddAbusePhoneReportService::class);
+//    }
+//
+//    function it_should_create_abuse_report_if_all_inputs_provided(IAbusePhoneReportRepository $repository)
+//    {
+//        $this
+//            ->inputs([
+//
+//            ])
+//            ->output('result')
+//            ->shouldBeAnInstanceOf(IAbusePhoneReportEntity::class);
+//    }
 
 
 }
