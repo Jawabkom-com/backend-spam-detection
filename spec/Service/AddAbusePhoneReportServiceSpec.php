@@ -10,39 +10,33 @@ use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummyAbusePho
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Prophecy\Prophet;
 use WabLab\DI\DI;
+
 
 class AddAbusePhoneReportServiceSpec extends ObjectBehavior
 {
-    private Prophet $prophet;
-    private DI $wablabDi;
 
-    public function __construct()
+    public function let(IDependencyInjector $di)
     {
-        $this->prophet = new Prophet();
-        $this->wablabDi = new DI();
-        $this->wablabDi->register(IAbusePhoneReportEntity::class, DummyAbusePhoneReportEntity::class);
-        $this->wablabDi->register(IAbusePhoneReportRepository::class, DummyAbusePhoneReportRepository::class);
-    }
+        $wablabDi = new DI();
+        $wablabDi->register(IAbusePhoneReportEntity::class, DummyAbusePhoneReportEntity::class);
+        $wablabDi->register(IAbusePhoneReportRepository::class, DummyAbusePhoneReportRepository::class);
 
-    function let(IDependencyInjector $di)
-    {
-        $di->make(Argument::any(), Argument::any())->will(function ($args) {
+        $di->make(Argument::any(), Argument::any())->will(function ($args) use($wablabDi) {
             $alias = $args[0];
             $aliasArgs = $args[1] ?? [];
-            return $this->wablabDi->make($alias, $aliasArgs);
+            return $wablabDi->make($alias, $aliasArgs);
         });
         DummyAbusePhoneReportRepository::$DB = [];
         $this->beConstructedWith($di->getWrappedObject());
     }
 
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType(AddAbusePhoneReportService::class);
     }
 
-    function it_should_create_abuse_report_if_all_inputs_provided()
+    public function it_should_create_abuse_report_if_all_inputs_provided()
     {
         $result = $this
             ->inputs([
