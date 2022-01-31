@@ -9,8 +9,11 @@ use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredScoreException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
 use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Abstract\AbstractService;
 use Jawabkom\Standard\Contract\IDependencyInjector;
+use WabLab\DI\DI;
 
 class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpdatePhoneSpamScoreService
 {
@@ -31,15 +34,18 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
     {
         $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
 
-        $phone = $this->getInput('phone');
-        $source = $this->getInput('source');
-        $country_code = $this->getInput('country_code');
-        $score = $this->getInput('score');
-        $tags = $this->getInput('tags');
+        $phone          = $this->getInput('phone');
+        $source         = $this->getInput('source');
+        $country_code   = $this->getInput('country_code');
+        $score          = $this->getInput('score');
+        $tags           = $this->getInput('tags');
 
         $this->validateInputs($phone, $source, $score);
 
         $this->filterInputs($phone, $source, $country_code, $score, $tags);
+
+        // check if record already exists
+        //$this->checkIfRecordExists($phone, $source);
 
         $phoneEntity->setSource($source);
         $phoneEntity->setPhone($phone);
@@ -53,6 +59,11 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
         $this->setOutput('result', $phoneEntity);
 
         return $this;
+    }
+
+    private function checkIfRecordExists($phone, $source)
+    {
+
     }
 
     /**
