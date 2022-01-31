@@ -4,7 +4,6 @@ namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
-use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
 use Jawabkom\Backend\Module\Spam\Detection\Service\AddPhoneSpamScoreService;
@@ -80,7 +79,7 @@ class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
         $result = $this
             ->inputs([
                 'phone' => '   +970599189357   ',
-                'score' => 10,
+                'score' => '   10  ',
                 'source' => ' test   ',
                 'country_code' => '   PS    ',
                 'tags' => [' personal   ']
@@ -93,5 +92,22 @@ class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
         $result->getSource()->shouldBe('test');
         $result->getCountryCode()->shouldBe('PS');
         $result->getTags()->offsetGet(0)->shouldBe('personal');
+    }
+
+    public function it_should_convert_score_to_float_if_string_provided()
+    {
+        $result = $this
+            ->inputs([
+                'phone' => '   +970599189357   ',
+                'score' => ' 10 ',
+                'source' => ' test   ',
+                'country_code' => '   PS    ',
+                'tags' => [' personal   ']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->getScore()->shouldBeFloat();
     }
 }

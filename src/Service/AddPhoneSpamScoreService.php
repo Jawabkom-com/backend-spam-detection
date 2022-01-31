@@ -21,6 +21,10 @@ class AddPhoneSpamScoreService extends AbstractService implements IAddPhoneSpamS
         $this->phoneLib = $di->make(Phone::class);
     }
 
+    /**
+     * @throws RequiredPhoneException
+     * @throws RequiredSourceException
+     */
     public function process(): static
     {
         $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
