@@ -12,6 +12,8 @@ class DummyAbusePhoneReportEntity implements IAbusePhoneReportEntity
     private $phone;
     private $phoneCountryCode;
     private $tags = [];
+    private $createdDateTime;
+    private $updatedDateTime;
 
     public function getReporterId(): string
     {
@@ -61,5 +63,25 @@ class DummyAbusePhoneReportEntity implements IAbusePhoneReportEntity
     public function setTags(array $tags): void
     {
         $this->tags = $tags;
+    }
+
+    public function getCreatedDateTime(): ?\DateTime
+    {
+        return $this->createdDateTime;
+    }
+
+    public function getUpdatedDateTime(): ?\DateTime
+    {
+        return $this->updatedDateTime;
+    }
+
+    public function setCreatedDateTime(\DateTime $dateTime): void
+    {
+        $this->createdDateTime = $dateTime;
+    }
+
+    public function setUpdatedDateTime(\DateTime $dateTime): void
+    {
+        $this->updatedDateTime = $dateTime;
     }
 }
