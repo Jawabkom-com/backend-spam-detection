@@ -110,4 +110,34 @@ class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
         $result->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
         $result->getScore()->shouldBeFloat();
     }
+
+    public function it_should_autofill_the_country_code_if_the_phone_number_is_normalized()
+    {
+        $this
+            ->inputs([
+                'phone' => '+970599189357',
+                'score' => '10',
+                'source' => 'data_source',
+                'country_code' => '',
+                'tags' => ['personal']
+            ])
+            ->process()
+            ->output('result')
+            ->getCountryCode()->shouldBe('PS');
+    }
+
+    public function it_should_normalize_phone_number_if_country_code_provided_and_phone_number_is_not_formatted()
+    {
+        $this
+            ->inputs([
+                'phone' => '0599189357',
+                'score' => '10',
+                'source' => 'data_source',
+                'country_code' => 'PS',
+                'tags' => ['personal']
+            ])
+            ->process()
+            ->output('result')
+            ->getPhone()->shouldBe('+970599189357');
+    }
 }
