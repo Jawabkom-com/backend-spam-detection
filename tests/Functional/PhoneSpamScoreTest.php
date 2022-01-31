@@ -2,13 +2,13 @@
 
 namespace Jawabkom\Backend\Module\Spam\Detection\Test\Functional;
 
-use Jawabkom\Backend\Module\Spam\Detection\Service\AddPhoneSpamScoreService;
+use Jawabkom\Backend\Module\Spam\Detection\Service\AddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\AbstractTestCase;
 
 class PhoneSpamScoreTest extends AbstractTestCase
 {
     public function test_AddService_WhenGivenAllData_MustReturnsRecord() {
-        $phoneSpamService = new AddPhoneSpamScoreService();
+        $phoneSpamService = new AddUpdatePhoneSpamScoreService();
         $inputs = [
             'phone' => '+970599189357',
             'score' => 10,

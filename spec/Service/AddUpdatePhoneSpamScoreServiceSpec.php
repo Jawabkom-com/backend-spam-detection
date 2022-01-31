@@ -6,7 +6,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
-use Jawabkom\Backend\Module\Spam\Detection\Service\AddPhoneSpamScoreService;
+use Jawabkom\Backend\Module\Spam\Detection\Service\AddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
@@ -14,7 +14,7 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use WabLab\DI\DI;
 
-class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
+class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
 {
     public function let(IDependencyInjector $di)
     {
@@ -33,7 +33,7 @@ class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType(AddPhoneSpamScoreService::class);
+        $this->shouldHaveType(AddUpdatePhoneSpamScoreService::class);
     }
 
     function it_should_create_phone_spam_record_if_all_inputs_provided()
