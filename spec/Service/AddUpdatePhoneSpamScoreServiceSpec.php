@@ -143,7 +143,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
 
     public function it_should_update_phone_score_record_if_already_exists()
     {
-        $record = $this
+        $this
             ->inputs([
                 'phone' => '0599189357',
                 'score' => '10',
@@ -151,6 +151,16 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'country_code' => 'PS',
                 'tags' => ['personal']
             ])
-            ->process();
+            ->process()->output('result');
+
+        $this
+            ->inputs([
+                'phone' => '0599189357',
+                'score' => '20',
+                'source' => 'data_source',
+                'country_code' => 'PS',
+                'tags' => ['personal', 'new tag']
+            ])
+            ->process()->output('result')->getScore()->shouldBe(20.0);
     }
 }

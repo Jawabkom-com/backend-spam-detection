@@ -33,6 +33,7 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
     public function process(): static
     {
         $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
+        $phoneRepo = $this->di->make(ISpamPhoneScoreRepository::class);
 
         $phone          = $this->getInput('phone');
         $source         = $this->getInput('source');
@@ -44,17 +45,24 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
 
         $this->filterInputs($phone, $source, $country_code, $score, $tags);
 
-        // check if record already exists
-        //$this->checkIfRecordExists($phone, $source);
-
         $phoneEntity->setSource($source);
         $phoneEntity->setPhone($phone);
-        $phoneEntity->setCountryCode($country_code);
-        $phoneEntity->setScore($score);
-        $phoneEntity->setTags($tags);
+        // check if record already exists
+        $record = $phoneRepo->getByPhoneAndSource($phoneEntity->getPhone(), $phoneEntity->getSource());
 
-        $phoneRepo = $this->di->make(ISpamPhoneScoreRepository::class);
-        $phoneRepo->saveEntity($phoneEntity);
+        if($record) {
+            $phoneEntity = $phoneRepo->updateEntity($record, [
+                'score' => $score,
+                'country_code' => $country_code,
+                'tags' => $tags
+            ]);
+        } else  {
+            $phoneEntity->setCountryCode($country_code);
+            $phoneEntity->setScore($score);
+            $phoneEntity->setTags($tags);
+            $phoneEntity->setCreatedDateTime(new \DateTime());
+            $phoneRepo->saveEntity($phoneEntity);
+        }
 
         $this->setOutput('result', $phoneEntity);
 
