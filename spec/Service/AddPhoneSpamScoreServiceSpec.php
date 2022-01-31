@@ -74,4 +74,24 @@ class AddPhoneSpamScoreServiceSpec extends ObjectBehavior
 
         $this->shouldThrow(RequiredSourceException::class)->duringProcess();
     }
+
+    public function it_should_trim_all_inputs_if_provided_with_spaces()
+    {
+        $result = $this
+            ->inputs([
+                'phone' => '   +970599189357   ',
+                'score' => 10,
+                'source' => ' test   ',
+                'country_code' => '   PS    ',
+                'tags' => [' personal   ']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->getPhone()->shouldBe('+970599189357');
+        $result->getSource()->shouldBe('test');
+        $result->getCountryCode()->shouldBe('PS');
+        $result->getTags()->offsetGet(0)->shouldBe('personal');
+    }
 }

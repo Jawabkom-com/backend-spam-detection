@@ -7,23 +7,52 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRe
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IAddPhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
+use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
 use Jawabkom\Standard\Abstract\AbstractService;
+use Jawabkom\Standard\Contract\IDependencyInjector;
 
 class AddPhoneSpamScoreService extends AbstractService implements IAddPhoneSpamScoreService
 {
+    private Phone $phoneLib;
+
+    public function __construct(IDependencyInjector $di)
+    {
+        parent::__construct($di);
+        $this->phoneLib = $di->make(Phone::class);
+    }
+
     public function process(): static
     {
         $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
 
         if($this->getInput('phone') == null) throw new RequiredPhoneException();
-        $phoneEntity->setPhone($this->getInput('phone'));
-
         if($this->getInput('source') == null) throw new RequiredSourceException();
-        $phoneEntity->setSource($this->getInput('source'));
-        
-        $phoneEntity->setCountryCode($this->getInput('country_code'));
-        $phoneEntity->setScore($this->getInput('score'));
-        $phoneEntity->setTags($this->getInput('tags'));
+
+        $phone = trim($this->getInput('phone'));
+        $source = trim($this->getInput('source'));
+        $country_code = $this->getInput('country_code');
+
+        $parsedPhone = $this->phoneLib->parse($phone, [$country_code]);
+        $phone = $parsedPhone['phone'];
+        if ($parsedPhone['is_valid']) {
+            $country_code = $parsedPhone['country_code'];
+        } else {
+            $country_code = trim($country_code);
+        }
+
+        $score = trim($this->getInput('score'));
+
+        $tags = $this->getInput('tags');
+
+        foreach ($tags as &$tag) {
+            $tag = trim($tag);
+        }
+
+        $phoneEntity->setSource($source);
+        $phoneEntity->setPhone($phone);
+        $phoneEntity->setCountryCode($country_code);
+        $phoneEntity->setScore($score);
+        $phoneEntity->setTags($tags);
 
         $phoneRepo = $this->di->make(ISpamPhoneScoreRepository::class);
         $phoneRepo->saveEntity($phoneEntity);
