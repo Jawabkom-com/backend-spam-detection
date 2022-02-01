@@ -4,7 +4,8 @@ namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\IAbusePhoneReportEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\IAbusePhoneReportRepository;
-use Jawabkom\Backend\Module\Spam\Detection\Service\AddAbusePhoneReportService;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
+use Jawabkom\Backend\Module\Spam\Detection\Service\AddUpdateAbusePhoneReportService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummyAbusePhoneReportEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummyAbusePhoneReportRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
@@ -13,7 +14,7 @@ use Prophecy\Argument;
 use WabLab\DI\DI;
 
 
-class AddAbusePhoneReportServiceSpec extends ObjectBehavior
+class AddUpdateAbusePhoneReportServiceSpec extends ObjectBehavior
 {
 
     public function let(IDependencyInjector $di)
@@ -33,7 +34,7 @@ class AddAbusePhoneReportServiceSpec extends ObjectBehavior
 
     public function it_is_initializable()
     {
-        $this->shouldHaveType(AddAbusePhoneReportService::class);
+        $this->shouldHaveType(AddUpdateAbusePhoneReportService::class);
     }
 
     public function it_should_create_abuse_report_if_all_inputs_provided()
@@ -55,6 +56,8 @@ class AddAbusePhoneReportServiceSpec extends ObjectBehavior
         $result->getPhone()->shouldBe('+962788208263');
         $result->getPhoneCountryCode()->shouldBe('JO');
         $result->getTags()->shouldHaveCount(1);
+        $result->getCreatedDateTime()->shouldBeAnInstanceOf(\DateTime::class);
+        $result->getUpdatedDateTime()->shouldBeAnInstanceOf(\DateTime::class);
     }
 
     public function it_should_autofill_the_country_code_if_the_phone_number_is_normalized()
@@ -107,5 +110,65 @@ class AddAbusePhoneReportServiceSpec extends ObjectBehavior
         $result->getPhone()->shouldBe('+962788208263');
         $result->getPhoneCountryCode()->shouldBe('JO');
         $result->getTags()->offsetGet(0)->shouldBe('business');
+    }
+
+    public function it_should_throw_exception_if_the_phone_number_is_not_normalized_and_no_country_code_provided()
+    {
+        $this->inputs([
+            'reporter_id' => '123',
+            'abuse_type' => 'spam',
+            'phone' => '0788208263',
+            'phone_country_code' => '',
+            'tags' => ['business']
+        ]);
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
+    }
+
+    public function it_should_throw_exception_if_the_phone_number_is_not_provided()
+    {
+        $this->inputs([
+            'reporter_id' => '123',
+            'abuse_type' => 'spam',
+            'phone' => '',
+            'phone_country_code' => 'JO',
+            'tags' => ['business']
+        ]);
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
+    }
+
+    public function it_should_throw_exception_if_the_reporter_id_is_not_provided()
+    {
+        $this->inputs([
+            'reporter_id' => '',
+            'abuse_type' => 'spam',
+            'phone' => '+962788208263',
+            'phone_country_code' => 'JO',
+            'tags' => ['business']
+        ]);
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
+    }
+
+    public function it_should_throw_exception_if_the_abuse_type_is_not_provided()
+    {
+        $this->inputs([
+            'reporter_id' => '123',
+            'abuse_type' => '',
+            'phone' => '+962788208263',
+            'phone_country_code' => 'JO',
+            'tags' => ['business']
+        ]);
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
+    }
+
+    public function it_should_throw_exception_if_tags_contains_none_string_item()
+    {
+        $this->inputs([
+            'reporter_id' => '123',
+            'abuse_type' => 'spam',
+            'phone' => '+962788208263',
+            'phone_country_code' => 'JO',
+            'tags' => [['business']]
+        ]);
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
     }
 }
