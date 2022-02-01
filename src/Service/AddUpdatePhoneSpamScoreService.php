@@ -10,11 +10,8 @@ use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredScoreException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
 use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
-use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
-use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Abstract\AbstractService;
 use Jawabkom\Standard\Contract\IDependencyInjector;
-use WabLab\DI\DI;
 
 class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpdatePhoneSpamScoreService
 {

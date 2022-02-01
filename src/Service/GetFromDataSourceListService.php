@@ -7,7 +7,7 @@ use Jawabkom\Standard\Abstract\AbstractService;
 
 class GetFromDataSourceListService extends AbstractService implements IAddUpdatePhoneSpamScoreService
 {
-    
+
     public function process(): static
     {
         // TODO: Implement process() method.
