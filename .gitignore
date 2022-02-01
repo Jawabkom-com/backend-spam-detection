@@ -3,4 +3,3 @@
 /report
 /html-coverage
 /.phpunit.result.cache
-tests/*
