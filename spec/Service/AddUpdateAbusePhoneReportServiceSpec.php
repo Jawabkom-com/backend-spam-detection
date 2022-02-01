@@ -206,4 +206,5 @@ class AddUpdateAbusePhoneReportServiceSpec extends ObjectBehavior
         $result->getAbuseType()->shouldBe('not_spam');
         $result->getCreatedDateTime()->format('Y-m-d H:i:s')->shouldNotBe($result->getUpdatedDateTime()->format('Y-m-d H:i:s'));
     }
+
 }
