@@ -40,12 +40,12 @@ class DummySpamPhoneScoreEntity implements ISpamPhoneScoreEntity
         return $this->score;
     }
 
-    public function getCreatedDateTime(): \DateTime
+    public function getCreatedDateTime(): ?\DateTime
     {
         return $this->created_at;
     }
 
-    public function getUpdatedDateTime(): \DateTime
+    public function getUpdatedDateTime(): ?\DateTime
     {
         return $this->updated_at;
     }

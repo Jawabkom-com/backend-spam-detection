@@ -9,8 +9,8 @@ interface ISpamPhoneScoreEntity
     public function getCountryCode():string;
     public function getTags():array;
     public function getScore():float;
-    public function getCreatedDateTime():\DateTime;
-    public function getUpdatedDateTime():\DateTime;
+    public function getCreatedDateTime():?\DateTime;
+    public function getUpdatedDateTime():?\DateTime;
 
     public function setPhone(string $phone):void;
     public function setSource(string $source):void;
