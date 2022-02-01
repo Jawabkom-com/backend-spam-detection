@@ -5,6 +5,7 @@ namespace Jawabkom\Backend\Module\Spam\Detection\Service;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IAddUpdatePhoneSpamScoreService;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredCountryCodeException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredScoreException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
@@ -29,6 +30,7 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
      * @throws RequiredPhoneException
      * @throws RequiredSourceException
      * @throws RequiredScoreException
+     * @throws RequiredCountryCodeException
      */
     public function process(): static
     {
@@ -37,41 +39,33 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
 
         $phone          = $this->getInput('phone');
         $source         = $this->getInput('source');
-        $country_code   = $this->getInput('country_code');
+        $countryCode   = $this->getInput('countryCode');
         $score          = $this->getInput('score');
         $tags           = $this->getInput('tags');
 
         $this->validateInputs($phone, $source, $score);
 
-        $this->filterInputs($phone, $source, $country_code, $score, $tags);
+        $this->filterInputs($phone, $source, $countryCode, $score, $tags);
 
         $phoneEntity->setSource($source);
         $phoneEntity->setPhone($phone);
-        // check if record already exists
-        $record = $phoneRepo->getByPhoneAndSource($phoneEntity->getPhone(), $phoneEntity->getSource());
+        $phoneEntity->setCountryCode($countryCode);
+        $phoneEntity->setScore($score);
+        $phoneEntity->setTags($tags);
+
+        $record = $phoneRepo->getByPhoneAndSource($phoneEntity->getPhone(), $phoneEntity->getSource(), $phoneEntity->getCountryCode());
 
         if($record) {
-            $phoneEntity = $phoneRepo->updateEntity($record, [
-                'score' => $score,
-                'country_code' => $country_code,
-                'tags' => $tags
-            ]);
+            $phoneEntity->setCreatedDateTime($record->getCreatedDateTime());
+            $phoneEntity->setUpdatedDateTime(new \DateTime());
         } else  {
-            $phoneEntity->setCountryCode($country_code);
-            $phoneEntity->setScore($score);
-            $phoneEntity->setTags($tags);
             $phoneEntity->setCreatedDateTime(new \DateTime());
-            $phoneRepo->saveEntity($phoneEntity);
         }
+        $phoneRepo->saveEntity($phoneEntity);
 
         $this->setOutput('result', $phoneEntity);
 
         return $this;
-    }
-
-    private function checkIfRecordExists($phone, $source)
-    {
-
     }
 
     /**
@@ -86,9 +80,12 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
         if($score == null) throw new RequiredScoreException();
     }
 
-    private function filterInputs(&$phone, &$source, &$country_code, &$score, &$tags)
+    /**
+     * @throws RequiredCountryCodeException
+     */
+    private function filterInputs(&$phone, &$source, &$countryCode, &$score, &$tags)
     {
-        $this->filterPhoneAndCountryCode($phone, $country_code);
+        $this->filterPhoneAndCountryCode($phone, $countryCode);
         $score = trim($score);
         $source = trim($source);
 
@@ -97,14 +94,15 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
         }
     }
 
-    protected function filterPhoneAndCountryCode(&$phone, &$country_code)
+    protected function filterPhoneAndCountryCode(&$phone, &$countryCode)
     {
-        $parsedPhone = $this->phoneLib->parse($phone, [$country_code]);
+        $parsedPhone = $this->phoneLib->parse($phone, [$countryCode]);
         $phone = $parsedPhone['phone'];
         if ($parsedPhone['is_valid']) {
-            $country_code = $parsedPhone['country_code'];
+            $countryCode = $parsedPhone['country_code'];
         } else {
-            $country_code = trim($country_code);
+            if(empty($countryCode)) throw new RequiredCountryCodeException();
+            $countryCode = trim($countryCode);
         }
     }
 

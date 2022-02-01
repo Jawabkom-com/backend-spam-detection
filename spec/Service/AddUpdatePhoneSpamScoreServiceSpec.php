@@ -4,6 +4,7 @@ namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredCountryCodeException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
 use Jawabkom\Backend\Module\Spam\Detection\Service\AddUpdatePhoneSpamScoreService;
@@ -42,7 +43,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
             'phone' => '+970599189357',
             'score' => 10,
             'source' => 'test',
-            'country_code' => 'PS',
+            'countryCode' => 'PS',
             'tags' => []
         ])->process()->output('result');
 
@@ -55,7 +56,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
             'phone' => '',
             'score' => 10,
             'source' => 'test',
-            'country_code' => 'PS',
+            'countryCode' => 'PS',
             'tags' => []
         ]);
 
@@ -67,7 +68,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
         $this->inputs([
             'phone' => '+970599189357',
             'score' => 10,
-            'country_code' => 'PS',
+            'countryCode' => 'PS',
             'tags' => []
         ]);
 
@@ -81,7 +82,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'phone' => '   +970599189357   ',
                 'score' => '   10  ',
                 'source' => ' test   ',
-                'country_code' => '   PS    ',
+                'countryCode' => '   PS    ',
                 'tags' => [' personal   ']
             ])
             ->process()
@@ -101,7 +102,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'phone' => '   +970599189357   ',
                 'score' => ' 10 ',
                 'source' => ' test   ',
-                'country_code' => '   PS    ',
+                'countryCode' => '   PS    ',
                 'tags' => [' personal   ']
             ])
             ->process()
@@ -118,7 +119,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'phone' => '+970599189357',
                 'score' => '10',
                 'source' => 'data_source',
-                'country_code' => '',
+                'countryCode' => '',
                 'tags' => ['personal']
             ])
             ->process()
@@ -133,7 +134,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'phone' => '0599189357',
                 'score' => '10',
                 'source' => 'data_source',
-                'country_code' => 'PS',
+                'countryCode' => 'PS',
                 'tags' => ['personal']
             ])
             ->process()
@@ -141,6 +142,11 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
             ->getPhone()->shouldBe('+970599189357');
     }
 
+    /**
+     * @throws \Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredScoreException
+     * @throws RequiredPhoneException
+     * @throws RequiredSourceException
+     */
     public function it_should_update_phone_score_record_if_already_exists()
     {
         $this
@@ -148,19 +154,40 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'phone' => '0599189357',
                 'score' => '10',
                 'source' => 'data_source',
-                'country_code' => 'PS',
+                'countryCode' => 'PS',
                 'tags' => ['personal']
             ])
-            ->process()->output('result');
+            ->process();
 
         $this
             ->inputs([
                 'phone' => '0599189357',
                 'score' => '20',
                 'source' => 'data_source',
-                'country_code' => 'PS',
+                'countryCode' => 'PS',
                 'tags' => ['personal', 'new tag']
             ])
             ->process()->output('result')->getScore()->shouldBe(20.0);
+    }
+
+    /**
+     * @throws RequiredPhoneException
+     * @throws \Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredScoreException
+     * @throws \Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredCountryCodeException
+     * @throws RequiredSourceException
+     */
+    public function it_should_create_phone_score_record_if_phone_is_not_normalized()
+    {
+        $this
+            ->inputs([
+                'phone' => '1001',
+                'score' => '10',
+                'source' => 'data_source',
+                'countryCode' => '',
+                'tags' => ['personal']
+            ]);
+        
+        $this->shouldThrow(RequiredCountryCodeException::class)->duringProcess();
+
     }
 }
