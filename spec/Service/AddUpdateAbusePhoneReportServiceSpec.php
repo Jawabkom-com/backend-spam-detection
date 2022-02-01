@@ -171,4 +171,39 @@ class AddUpdateAbusePhoneReportServiceSpec extends ObjectBehavior
         ]);
         $this->shouldThrow(RequiredInputsException::class)->duringProcess();
     }
+
+    public function it_should_update_abuse_report_if_all_inputs_provided()
+    {
+        $result = $this
+            ->inputs([
+                'reporter_id' => '123',
+                'abuse_type' => 'spam',
+                'phone' => '+962788208263',
+                'phone_country_code' => 'JO',
+                'tags' => ['business']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->getCreatedDateTime()->format('Y-m-d H:i:s')->shouldBe($result->getUpdatedDateTime()->format('Y-m-d H:i:s'));
+        $result->setCreatedDateTime(new \DateTime('2000-01-01'));
+        $result->setUpdatedDateTime(new \DateTime('2000-01-01'));
+        $repository = new DummyAbusePhoneReportRepository();
+        $repository->saveEntity($result->getWrappedObject());
+
+
+        $result = $this
+            ->inputs([
+                'reporter_id' => '123',
+                'abuse_type' => 'not_spam',
+                'phone' => '+962788208263',
+                'phone_country_code' => 'JO',
+                'tags' => ['business']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->getAbuseType()->shouldBe('not_spam');
+        $result->getCreatedDateTime()->format('Y-m-d H:i:s')->shouldNotBe($result->getUpdatedDateTime()->format('Y-m-d H:i:s'));
+    }
 }

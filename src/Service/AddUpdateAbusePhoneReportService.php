@@ -31,16 +31,20 @@ class AddUpdateAbusePhoneReportService extends AbstractService implements IAddUp
         $this->filterInputVariables($reporterId, $abuseType, $tags, $phone, $phoneCountry);
         $this->validateInputVariables($reporterId, $abuseType, $tags, $phone, $phoneCountry);
 
-        $oEntity = $this->di->make(IAbusePhoneReportEntity::class);
-        $oEntity->setReporterId($reporterId);
+        $oRepository = $this->di->make(IAbusePhoneReportRepository::class);
+
+        $oEntity = $oRepository->getByReporterIdAndPhone($reporterId, $phone, $phoneCountry);
+        if(!$oEntity) {
+            $oEntity = $this->di->make(IAbusePhoneReportEntity::class);
+            $oEntity->setReporterId($reporterId);
+            $oEntity->setPhone($phone);
+            $oEntity->setPhoneCountryCode($phoneCountry);
+            $oEntity->setCreatedDateTime(new \DateTime());
+        }
         $oEntity->setAbuseType($abuseType);
-        $oEntity->setPhone($phone);
-        $oEntity->setPhoneCountryCode($phoneCountry);
         $oEntity->setTags($tags);
-        $oEntity->setCreatedDateTime(new \DateTime());
         $oEntity->setUpdatedDateTime(new \DateTime());
 
-        $oRepository = $this->di->make(IAbusePhoneReportRepository::class);
         $oRepository->saveEntity($oEntity);
 
         $this->setOutput('result', $oEntity);
