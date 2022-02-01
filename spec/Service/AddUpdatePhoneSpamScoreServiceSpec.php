@@ -176,7 +176,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
      * @throws \Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredCountryCodeException
      * @throws RequiredSourceException
      */
-    public function it_should_create_phone_score_record_if_phone_is_not_normalized()
+    public function it_should_throw_country_code_exception_if_phone_is_not_normalized_and_country_code_is_empty()
     {
         $this
             ->inputs([
@@ -186,8 +186,20 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'countryCode' => '',
                 'tags' => ['personal']
             ]);
-        
+
         $this->shouldThrow(RequiredCountryCodeException::class)->duringProcess();
 
+    }
+
+    public function it_should_create_phone_score_record_if_not_normalized_phone_provided_with_country_code()
+    {
+        $this
+            ->inputs([
+                'phone' => '1001',
+                'score' => '10',
+                'source' => 'data_source',
+                'countryCode' => 'PS',
+                'tags' => ['personal']
+            ])->process()->output('result')->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
     }
 }
