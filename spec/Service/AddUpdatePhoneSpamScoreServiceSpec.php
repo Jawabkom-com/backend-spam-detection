@@ -202,4 +202,39 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
                 'tags' => ['personal']
             ])->process()->output('result')->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
     }
+
+    public function it_should_update_phone_record_if_all_inputs_provided()
+    {
+        $result = $this
+            ->inputs([
+                'phone' => '0599189357',
+                'score' => '10',
+                'source' => 'data_source',
+                'countryCode' => 'PS',
+                'tags' => ['personal']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->getCreatedDateTime()->format('Y-m-d H:i:s')->shouldBe($result->getUpdatedDateTime()->format('Y-m-d H:i:s'));
+        $result->setCreatedDateTime(new \DateTime('2020-01-01'));
+        $result->setUpdatedDateTime(new \DateTime('2020-01-01'));
+        $repository = new DummySpamPhoneScoreRepository();
+        $repository->saveEntity($result->getWrappedObject());
+
+
+        $result = $this
+            ->inputs([
+                'phone' => '0599189357',
+                'score' => '20',
+                'source' => 'data_source',
+                'countryCode' => 'PS',
+                'tags' => ['personal']
+            ])
+            ->process()
+            ->output('result');
+
+        $result->getScore()->shouldBe(20.0);
+    }
+
 }

@@ -31,7 +31,6 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
      */
     public function process(): static
     {
-        $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
         $phoneRepo = $this->di->make(ISpamPhoneScoreRepository::class);
 
         $phone          = $this->getInput('phone');
@@ -44,20 +43,19 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
 
         $this->filterInputs($phone, $source, $countryCode, $score, $tags);
 
-        $phoneEntity->setSource($source);
-        $phoneEntity->setPhone($phone);
-        $phoneEntity->setCountryCode($countryCode);
-        $phoneEntity->setScore($score);
-        $phoneEntity->setTags($tags);
+        $phoneEntity = $phoneRepo->getByPhoneCountryCodeAndSource($phone, $countryCode, $score);
 
-        $record = $phoneRepo->getByPhoneAndSource($phoneEntity->getPhone(), $phoneEntity->getSource(), $phoneEntity->getCountryCode());
-
-        if($record) {
-            $phoneEntity->setCreatedDateTime($record->getCreatedDateTime());
-            $phoneEntity->setUpdatedDateTime(new \DateTime());
-        } else  {
+        if(!$phoneEntity) {
+            $phoneEntity = $this->di->make(ISpamPhoneScoreEntity::class);
+            $phoneEntity->setPhone($phone);
+            $phoneEntity->setSource($source);
+            $phoneEntity->setCountryCode($countryCode);
             $phoneEntity->setCreatedDateTime(new \DateTime());
         }
+        $phoneEntity->setScore($score);
+        $phoneEntity->setTags($tags);
+        $phoneEntity->setUpdatedDateTime(new \DateTime());
+
         $phoneRepo->saveEntity($phoneEntity);
 
         $this->setOutput('result', $phoneEntity);
@@ -91,6 +89,9 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
         }
     }
 
+    /**
+     * @throws RequiredCountryCodeException
+     */
     protected function filterPhoneAndCountryCode(&$phone, &$countryCode)
     {
         $parsedPhone = $this->phoneLib->parse($phone, [$countryCode]);

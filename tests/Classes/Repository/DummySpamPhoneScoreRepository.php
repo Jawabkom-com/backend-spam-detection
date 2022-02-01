@@ -12,12 +12,17 @@ class DummySpamPhoneScoreRepository implements ISpamPhoneScoreRepository
 
     public function saveEntity(ISpamPhoneScoreEntity $entity): void
     {
-        static::$DB[md5($entity->getPhone().$entity->getSource())] = $entity;
+        $id = $this->generateEntityId($entity->getPhone(), $entity->getSource(), $entity->getCountryCode());
+        static::$DB[$id] = $entity;
     }
 
-    public function getByPhoneAndSource($phone, $source, $countryCode): ?ISpamPhoneScoreEntity
+    public function getByPhoneCountryCodeAndSource($phone, $source, $countryCode): ?ISpamPhoneScoreEntity
     {
-        return static::$DB[md5($phone.$source)] ?? null;
+        $id = $this->generateEntityId($phone,$source, $countryCode);
+        return static::$DB[$id] ?? null;
     }
 
+    protected function generateEntityId($phone,$source, $countryCode) {
+        return md5("{$phone}-{$source}-{$countryCode}");
+    }
 }
