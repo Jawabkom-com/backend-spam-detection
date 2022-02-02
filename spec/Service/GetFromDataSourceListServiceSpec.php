@@ -21,6 +21,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $wablabDi = new DI();
         $registryObj = new DataSourceRegistry();
         $registryObj->register('Test Data List', new TestDataListResult(), new DataListMapper());
+        $registryObj->register('Another Test Data List', new TestDataListResult(), new DataListMapper());
         $di->make(Argument::any(), Argument::any())->will(function ($args) use($wablabDi) {
             $alias = $args[0];
             $aliasArgs = $args[1] ?? [];
@@ -34,14 +35,28 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $this->shouldHaveType(GetFromDataSourceListService::class);
     }
 
-    public function it_should_return_result_if_provided_normalized_phone()
+    public function it_should_return_single_result_if_provided_normalized_phone()
     {
         $result = $this->inputs([
             'phone' => '+970599189357',
             'searchAliases' => ['Test Data List']
         ])->process()->output('result');
 
+        $result->shouldHaveCount(1);
         $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
         $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
+    }
+
+    public function it_should_return_multiple_results_if_normalized_phone_is_provided()
+    {
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List', 'Another Test Data List']
+        ])->process()->output('result');
+
+        $result->shouldHaveCount(2);
+        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
+
     }
 }
