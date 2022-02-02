@@ -4,17 +4,17 @@ namespace Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSource;
 
-class TestDataListResult implements ISpamPhoneDataSource
+class TestOtherDataListResult implements ISpamPhoneDataSource
 {
 
     public function getTTLSeconds(): int
     {
-        return 3600;
+        return 5000;
     }
 
     public function getDataSourceName(): string
     {
-        return 'Test Data List';
+        return 'Another Test Data List';
     }
 
     public function getByPhone(string $normalizedPhoneNumber): mixed
@@ -23,11 +23,9 @@ class TestDataListResult implements ISpamPhoneDataSource
                 { "id": 1,
                 "name": "Mamdouh Zaqout",
                 "username": "Mamdouh",
-                "score": 20.0,
-                "country_code": "PS",
-                "source": "Test Date List",
                 "email": "mamdouhzaq@gmail.com",
-                "phone": "{$normalizedPhoneNumber}"
+                "phone": "{$normalizedPhoneNumber}",
+                "spam": "No"
                 }
                 JSON, true);
     }

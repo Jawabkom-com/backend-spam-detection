@@ -2,10 +2,11 @@
 
 namespace Jawabkom\Backend\Module\Spam\Detection;
 
+use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSource;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSourceToEntityMapper;
 
-class DataSourceRegistry
+class DataSourceRegistry implements IDataSourceRegistry
 {
     protected array $registry = [];
 

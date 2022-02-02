@@ -2,9 +2,12 @@
 
 namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
-use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSource;
-use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
+use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -16,13 +19,14 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
     public function let(IDependencyInjector $di)
     {
         $wablabDi = new DI();
-
+        $registryObj = new DataSourceRegistry();
+        $registryObj->register('Test Data List', new TestDataListResult(), new DataListMapper());
         $di->make(Argument::any(), Argument::any())->will(function ($args) use($wablabDi) {
             $alias = $args[0];
             $aliasArgs = $args[1] ?? [];
             return $wablabDi->make($alias, $aliasArgs);
         });
-        $this->beConstructedWith($di->getWrappedObject());
+        $this->beConstructedWith($di->getWrappedObject(), $registryObj);
     }
 
     function it_is_initializable()
@@ -32,10 +36,12 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
 
     public function it_should_return_result_if_provided_normalized_phone()
     {
-//        $result = $this->inputs([
-//            'phone' => '+970599189357',
-//        ])->process()->output('result');
-//
-//        $result->shouldBeAnInstanceOf(IGetFromDataSourceListService::class);
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('result');
+
+        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
     }
 }
