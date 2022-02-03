@@ -10,6 +10,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasExceptio
 use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -59,7 +60,6 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $result->shouldHaveCount(2);
         $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
         $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
-
     }
 
     public function it_should_throw_exception_if_no_phone_provided()

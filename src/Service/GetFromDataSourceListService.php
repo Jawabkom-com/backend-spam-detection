@@ -14,7 +14,9 @@ use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestOtherDataListResult;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummyAbusePhoneReportEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummyAbusePhoneReportRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Abstract\AbstractService;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use WabLab\DI\DI;
@@ -43,9 +45,10 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $totalResult = [];
         foreach ($searchAliases as $alias) {
             $registryObject = $this->dataSourceRegistry->getRegistry($alias);
-            $source = $registryObject['source'];
-            $data = $source->getByPhone($this->getInput('phone'));
-            $totalResult[] = $registryObject['mapper']->map($data);
+            $sourceObject = $registryObject['source'];
+            $data = $sourceObject->getByPhone($phone);
+            $result = $registryObject['mapper']->map($data);
+            $totalResult[] = $result;
         }
         $this->setOutput('result', $totalResult);
         return $this;
@@ -55,7 +58,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
      * @throws RequiredPhoneException
      * @throws RequiredSearchAliasException
      */
-    private function validateInputs($searchAliases, $phone)
+    protected function validateInputs($searchAliases, $phone)
     {
         if(empty($searchAliases)) throw new RequiredSearchAliasException('Search aliases are required, please provide one at minimum');
         if($phone == '') throw new RequiredPhoneException('Phone is required');
