@@ -4,13 +4,16 @@ namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasException;
 use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
-use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySearchRequestRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -23,14 +26,15 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
     {
         $wablabDi = new DI();
         $registryObj = new DataSourceRegistry();
-        $registryObj->register('Test Data List', new TestDataListResult(), new DataListMapper());
-        $registryObj->register('Another Test Data List', new TestDataListResult(), new DataListMapper());
-        $di->make(Argument::any(), Argument::any())->will(function ($args) use($wablabDi) {
+        $registryObj->register('Test Data List', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
+        $registryObj->register('Another Test Data List', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
+
+        $di->make(Argument::any(), Argument::any())->will(function ($args) use ($wablabDi) {
             $alias = $args[0];
             $aliasArgs = $args[1] ?? [];
             return $wablabDi->make($alias, $aliasArgs);
         });
-        $this->beConstructedWith($di->getWrappedObject(), $registryObj);
+        $this->beConstructedWith($di->getWrappedObject(), $registryObj, new DummySearchRequestRepository(), new DummySearchRequestEntity());
     }
 
     function it_is_initializable()
@@ -80,5 +84,21 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         ]);
 
         $this->shouldThrow(RequiredSearchAliasException::class)->duringProcess();
+    }
+
+    public function it_should_return_single_search_request_object_when_search_done()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests')->shouldHaveCount(1);
+    }
+
+    public function it_should_return_double_search_requests_when_search_done()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List', 'Another Test Data List']
+        ])->process()->output('search_requests')->shouldHaveCount(2);
     }
 }
