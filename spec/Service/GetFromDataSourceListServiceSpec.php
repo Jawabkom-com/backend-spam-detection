@@ -5,6 +5,8 @@ namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasException;
 use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
@@ -58,5 +60,25 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
         $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
 
+    }
+
+    public function it_should_throw_exception_if_no_phone_provided()
+    {
+        $this->inputs([
+            'phone' => '',
+            'searchAliases' => ['Test Data List']
+        ]);
+
+        $this->shouldThrow(RequiredPhoneException::class)->duringProcess();
+    }
+
+    public function it_should_throw_exception_if_no_search_aliases_provided()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => []
+        ]);
+
+        $this->shouldThrow(RequiredSearchAliasException::class)->duringProcess();
     }
 }
