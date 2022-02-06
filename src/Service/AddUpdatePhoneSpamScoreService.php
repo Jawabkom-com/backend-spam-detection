@@ -50,14 +50,13 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
             $phoneEntity->setPhone($phone);
             $phoneEntity->setSource($source);
             $phoneEntity->setCountryCode($countryCode);
-            $phoneEntity->setScore($score);
-            $phoneEntity->setTags($tags);
             $phoneEntity->setCreatedDateTime(new \DateTime());
         } else {
-            $phoneEntity->setScore($score);
-            $phoneEntity->setTags($tags);
             $phoneEntity->setUpdatedDateTime(new \DateTime());
         }
+        $phoneEntity->setScore($score);
+        $phoneEntity->setTags($tags);
+
         $phoneRepo->saveEntity($phoneEntity);
 
         $this->setOutput('result', $phoneEntity);
