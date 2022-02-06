@@ -58,7 +58,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         return $this;
     }
 
-    protected function initSearchRequest(string $hash, string $alias)
+    protected function initSearchRequest(string $hash, string $alias): ISearchRequestEntity
     {
         $entity = $this->searchRequestEntity;
         $entity->setIsFromCache(false);
@@ -74,6 +74,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     protected function updateSearchRequestSetResult(ISearchRequestEntity $entity, $result)
     {
         $entity->setRequestSearchResults($result);
+        $entity->setStatus('done');
         $this->searchRequestRepository->saveEntity($entity);
     }
 

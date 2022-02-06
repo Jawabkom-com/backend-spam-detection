@@ -1,3 +1,5 @@
+formatter.name: pretty
+
 suites:
   jawabkom_suite:
     namespace: Jawabkom\Backend\Module\Spam\Detection

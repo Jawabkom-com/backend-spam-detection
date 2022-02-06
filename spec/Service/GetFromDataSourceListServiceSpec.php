@@ -94,11 +94,19 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         ])->process()->output('search_requests')->shouldHaveCount(1);
     }
 
-    public function it_should_return_double_search_requests_when_search_done()
+    public function it_should_return_double_search_requests_when_two_aliases_are_provided()
     {
         $this->inputs([
             'phone' => '+970599189357',
             'searchAliases' => ['Test Data List', 'Another Test Data List']
         ])->process()->output('search_requests')->shouldHaveCount(2);
+    }
+
+    public function it_should_return_status_done_when_search_for_phone()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
     }
 }
