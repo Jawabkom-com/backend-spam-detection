@@ -109,4 +109,12 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'searchAliases' => ['Test Data List']
         ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
     }
+
+    public function it_should_return_hash_in_the_right_way()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests')->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['aliases' => ['Test Data List'], 'phone' => '+970599189357'])));
+    }
 }
