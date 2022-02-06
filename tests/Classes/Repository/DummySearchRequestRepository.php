@@ -9,14 +9,16 @@ use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchReques
 class DummySearchRequestRepository implements ISearchRequestRepository
 {
     public static $DB = [];
+    public static $ID = 0;
 
     public function saveEntity(ISearchRequestEntity $entity):void
     {
-        static::$DB[$entity->getHash()] = $entity;
+        static::$DB[++static::$ID] = $entity;
     }
 
-    public function getByHash(string $hash): iterable
+    public function getByHash(string $hash, string $status)
     {
-        return static::$DB[$hash] ?? [];
+        return static::$DB[static::$ID]->$hash ?? null;
     }
+
 }

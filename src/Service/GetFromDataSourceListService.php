@@ -8,8 +8,6 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRep
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasException;
-use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
-use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Standard\Abstract\AbstractService;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 
@@ -40,10 +38,10 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $this->validateInputs($searchAliases, $phone);
 
         $searchGroupHash = md5(json_encode(['aliases' => $searchAliases, 'phone' => $phone]));
-        //$cachedResultsByAliases = $this->getCachedResultsByAliases($searchGroupHash);
-
+        $cachedResultsByAliases = $this->getCachedResultsByAliases($searchGroupHash);
         $totalResult = [];
         $searchRequests = [];
+
         foreach ($searchAliases as $alias) {
             $searchRequests[] = $searchRequest =  $this->initSearchRequest($searchGroupHash, $alias);
             $registryObject = $this->dataSourceRegistry->getRegistry($alias);
@@ -91,8 +89,9 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     protected function getCachedResultsByAliases(string $searchGroupHash): array
     {
         $cachedResultsByAliases = [];
-        $cachedResults = $this->searchRequestRepository->getByHash($searchGroupHash);
+        $cachedResults = $this->searchRequestRepository->getByHash($searchGroupHash, 'done');
         if ($cachedResults) {
+            die(var_dump($cachedResults));
             foreach ($cachedResults as $cachedResult) {
                 $cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
             }

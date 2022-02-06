@@ -110,11 +110,29 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
     }
 
-    public function it_should_return_hash_in_the_right_way()
+    public function it_should_return_right_hash_value_if_no_data_missing()
+    {
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests');
+
+        $result->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['aliases' => ['Test Data List'], 'phone' => '+970599189357'])));
+        $result->offsetGet(0)->getIsFromCache()->shouldBe(false);
+    }
+
+    public function it_should_add_result_for_search_requests_into_cache()
     {
         $this->inputs([
             'phone' => '+970599189357',
-            'searchAliases' => ['Test Data List']
-        ])->process()->output('search_requests')->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['aliases' => ['Test Data List'], 'phone' => '+970599189357'])));
+            'searchAliases' => ['Test Data List', 'Another Test Data List']
+        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(false);
+
+//        $this->inputs([
+//            'phone' => '+970599189357',
+//            'searchAliases' => ['Test Data List', 'Another Test Data List']
+//        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
+
     }
+
 }
