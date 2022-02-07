@@ -9,6 +9,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSourceException;
 use Jawabkom\Backend\Module\Spam\Detection\Service\AddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummyAbusePhoneReportRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
@@ -220,6 +221,9 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
 
         $result->setCreatedDateTime(new \DateTime('2000-01-01'));
         $result->setUpdatedDateTime(new \DateTime('2000-01-01'));
+
+        $repository = new DummySpamPhoneScoreRepository();
+        $repository->saveEntity($result->getWrappedObject());
 
         $result = $this
             ->inputs([
