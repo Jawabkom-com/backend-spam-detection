@@ -123,15 +123,18 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
 
     public function it_should_add_result_for_search_requests_into_cache()
     {
+        $searchAliases = ['Test Data List', 'Another Test Data List'];
+        $phone = '+970599189357';
+
+        $this->inputs([
+            'phone' => $phone,
+            'searchAliases' => $searchAliases
+        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(false);
+
         $this->inputs([
             'phone' => '+970599189357',
             'searchAliases' => ['Test Data List', 'Another Test Data List']
-        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(false);
-
-//        $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List', 'Another Test Data List']
-//        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
+        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
 
     }
 

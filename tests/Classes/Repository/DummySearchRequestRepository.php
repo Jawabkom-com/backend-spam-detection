@@ -18,7 +18,11 @@ class DummySearchRequestRepository implements ISearchRequestRepository
 
     public function getByHash(string $hash, string $status)
     {
-        return static::$DB[static::$ID]->$hash ?? null;
+        return static::$DB[static::$ID][$hash] ?? null;
     }
 
+    public function getAll()
+    {
+        return static::$DB;
+    }
 }

@@ -221,9 +221,6 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
         $result->setCreatedDateTime(new \DateTime('2000-01-01'));
         $result->setUpdatedDateTime(new \DateTime('2000-01-01'));
 
-        $repository = new DummySpamPhoneScoreRepository();
-       $repository->saveEntity($result->getWrappedObject());
-
         $result = $this
             ->inputs([
                 'phone' => '0599189357',

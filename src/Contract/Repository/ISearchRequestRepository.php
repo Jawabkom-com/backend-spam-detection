@@ -9,4 +9,6 @@ interface ISearchRequestRepository
     public function saveEntity(ISearchRequestEntity $entity):void;
 
     public function getByHash(string $hash, string $status);
+
+    public function getAll();
 }

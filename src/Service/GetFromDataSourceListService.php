@@ -38,7 +38,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $this->validateInputs($searchAliases, $phone);
 
         $searchGroupHash = md5(json_encode(['aliases' => $searchAliases, 'phone' => $phone]));
-        $cachedResultsByAliases = $this->getCachedResultsByAliases($searchGroupHash);
+       // $cachedResultsByAliases = $this->getCachedResultsByAliases($searchGroupHash);
         $totalResult = [];
         $searchRequests = [];
 
@@ -91,7 +91,6 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $cachedResultsByAliases = [];
         $cachedResults = $this->searchRequestRepository->getByHash($searchGroupHash, 'done');
         if ($cachedResults) {
-            die(var_dump($cachedResults));
             foreach ($cachedResults as $cachedResult) {
                 $cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
             }
