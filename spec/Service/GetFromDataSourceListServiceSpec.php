@@ -42,93 +42,104 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $this->shouldHaveType(GetFromDataSourceListService::class);
     }
 
-//    public function it_should_return_single_result_if_provided_normalized_phone()
-//    {
-//        $result = $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List']
-//        ])->process()->output('result');
-//
-//        $result->shouldHaveCount(1);
-//        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
-//        $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
-//    }
-//
-//    public function it_should_return_multiple_results_if_normalized_phone_is_provided()
-//    {
-//        $result = $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List', 'Another Test Data List']
-//        ])->process()->output('result');
-//
-//        $result->shouldHaveCount(2);
-//        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
-//        $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
-//    }
-//
-//    public function it_should_throw_exception_if_no_phone_provided()
-//    {
-//        $this->inputs([
-//            'phone' => '',
-//            'searchAliases' => ['Test Data List']
-//        ]);
-//
-//        $this->shouldThrow(RequiredPhoneException::class)->duringProcess();
-//    }
-//
-//    public function it_should_throw_exception_if_no_search_aliases_provided()
-//    {
-//        $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => []
-//        ]);
-//
-//        $this->shouldThrow(RequiredSearchAliasException::class)->duringProcess();
-//    }
-//
-//    public function it_should_return_single_search_request_object_when_search_done()
-//    {
-//        $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List']
-//        ])->process()->output('search_requests')->shouldHaveCount(1);
-//    }
-//
-//    public function it_should_return_double_search_requests_when_two_aliases_are_provided()
-//    {
-//        $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List', 'Another Test Data List']
-//        ])->process()->output('search_requests')->shouldHaveCount(2);
-//    }
-//
-//    public function it_should_return_status_done_when_search_for_phone()
-//    {
-//        $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List']
-//        ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
-//    }
-//
-//    public function it_should_return_right_hash_value_if_no_data_missing()
-//    {
-//        $result = $this->inputs([
-//            'phone' => '+970599189357',
-//            'searchAliases' => ['Test Data List']
-//        ])->process()->output('search_requests');
-//
-//        $result->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['aliases' => ['Test Data List'], 'phone' => '+970599189357'])));
-//        $result->offsetGet(0)->getIsFromCache()->shouldBe(false);
-//    }
+    public function it_should_return_single_result_if_provided_normalized_phone()
+    {
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('result');
+
+        $result->shouldHaveCount(1);
+        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
+    }
+
+    public function it_should_return_multiple_results_if_normalized_phone_is_provided()
+    {
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List', 'Another Test Data List']
+        ])->process()->output('result');
+
+        $result->shouldHaveCount(2);
+        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
+    }
+
+    public function it_should_throw_exception_if_no_phone_provided()
+    {
+        $this->inputs([
+            'phone' => '',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List']
+        ]);
+
+        $this->shouldThrow(RequiredPhoneException::class)->duringProcess();
+    }
+
+    public function it_should_throw_exception_if_no_search_aliases_provided()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => []
+        ]);
+
+        $this->shouldThrow(RequiredSearchAliasException::class)->duringProcess();
+    }
+
+    public function it_should_return_single_search_request_object_when_search_done()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests')->shouldHaveCount(1);
+    }
+
+    public function it_should_return_double_search_requests_when_two_aliases_are_provided()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List', 'Another Test Data List']
+        ])->process()->output('search_requests')->shouldHaveCount(2);
+    }
+
+    public function it_should_return_status_done_when_search_for_phone()
+    {
+        $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
+    }
+
+    public function it_should_return_right_hash_value_if_no_data_missing()
+    {
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'countryCode' => 'PS',
+            'searchAliases' => ['Test Data List']
+        ])->process()->output('search_requests');
+
+        $result->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['phone' => '+970599189357', 'countryCode' => 'PS'])));
+        $result->offsetGet(0)->getIsFromCache()->shouldBe(false);
+    }
 
     public function it_should_add_result_for_search_requests_into_cache()
     {
         $searchAliases = ['Test Data List', 'Another Test Data List'];
         $phone = '+970599189357';
-        $hash = md5(json_encode(['aliases' => $searchAliases, 'phone' => $phone]));
+        $countryCode = 'PS';
+
+        $hash = md5(json_encode(['phone' => $phone, 'countryCode' => $countryCode]));
 
         $result = $this->inputs([
             'phone' => $phone,
+            'countryCode' => 'PS',
             'searchAliases' => $searchAliases
         ])->process()->output('search_requests')->offsetGet(0);
 
@@ -137,6 +148,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
 
         $this->inputs([
             'phone' => $phone,
+            'countryCode' => 'PS',
             'searchAliases' => $searchAliases
         ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
 

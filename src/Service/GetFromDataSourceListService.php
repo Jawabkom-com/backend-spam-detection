@@ -34,35 +34,31 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     {
         $searchAliases = $this->getInput('searchAliases');
         $phone = $this->getInput('phone');
+        $countryCode = $this->getInput('countryCode');
 
-        $this->validateInputs($searchAliases, $phone);
+        $this->validateInputs($searchAliases, $phone, $countryCode);
 
-        $searchGroupHash = md5(json_encode(['aliases' => $searchAliases, 'phone' => $phone]));
+        $searchGroupHash = md5(json_encode(['phone' => $phone, 'countryCode' => $countryCode]));
         $cachedResultsByAliases = $this->getCachedResultsByAliases($searchGroupHash);
 
         $totalResult = [];
         $searchRequests = [];
 
         foreach ($searchAliases as $alias) {
-            if(count($cachedResultsByAliases)) {
-                if(isset($cachedResultsByAliases[$alias])) {
-                    var_dump($cachedResultsByAliases[$alias]);
-                }
-            }
+            $searchRequests[] = $searchRequest = $this->initSearchRequest($searchGroupHash, $alias);
             $registryObject = $this->dataSourceRegistry->getRegistry($alias);
             $sourceObject = $registryObject['source'];
             $data = $sourceObject->getByPhone($phone);
             $result = $registryObject['mapper']->map($data);
             $totalResult[] = $result;
-            $searchRequests[] = $this->initSearchRequest($searchGroupHash, $alias, (array)$result);
-            //$this->updateSearchRequestSetResult($searchRequest, (array)$result);
+            $this->updateSearchRequestSetResult($searchRequest, (array)$result);
         }
         $this->setOutput('search_requests', $searchRequests);
         $this->setOutput('result', $totalResult);
         return $this;
     }
 
-    protected function initSearchRequest(string $hash, string $alias, array $result): ISearchRequestEntity
+    protected function initSearchRequest(string $hash, string $alias): ISearchRequestEntity
     {
         $entity = $this->searchRequestEntity;
         $entity->setIsFromCache(false);
@@ -70,27 +66,28 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $entity->setMatchesCount(1);
         $entity->setRequestDateTime(new \DateTime());
         $entity->setResultAliasSource($alias);
-        $entity->setStatus('done');
-        $entity->setRequestSearchResults($result);
+        $entity->setStatus('init');
+        $entity->setRequestSearchResults([]);
         $this->searchRequestRepository->saveEntity($entity);
         return $entity;
     }
 
-//    protected function updateSearchRequestSetResult(ISearchRequestEntity $entity, $result)
-//    {
-//        $entity->setRequestSearchResults($result);
-//        $entity->setStatus('done');
-//        $this->searchRequestRepository->saveEntity($entity);
-//    }
+    protected function updateSearchRequestSetResult(ISearchRequestEntity $entity, $result)
+    {
+        $entity->setRequestSearchResults($result);
+        $entity->setStatus('done');
+        $this->searchRequestRepository->saveEntity($entity);
+    }
 
     /**
      * @throws RequiredPhoneException
      * @throws RequiredSearchAliasException
      */
-    protected function validateInputs($searchAliases, $phone)
+    protected function validateInputs($searchAliases, $phone, $countryCode)
     {
         if(empty($searchAliases)) throw new RequiredSearchAliasException('Search aliases are required, please provide one at minimum');
         if($phone == '') throw new RequiredPhoneException('Phone is required');
+        if($countryCode == '') throw new RequiredPhoneException('Country Code is required');
     }
 
     protected function getCachedResultsByAliases(string $searchGroupHash): array
