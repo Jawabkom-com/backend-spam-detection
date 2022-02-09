@@ -39,7 +39,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $this->validateInputs($searchAliases, $phone, $countryCode);
 
         $searchGroupHash = md5(json_encode(['phone' => $phone, 'countryCode' => $countryCode]));
-        $cachedResultsByAliases = $this->getCachedResultsByAliases($searchGroupHash);
+        $cachedResultsByHash = $this->getCachedResultsByHash($searchGroupHash);
 
         $totalResult = [];
         $searchRequests = [];
@@ -51,7 +51,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             $data = $sourceObject->getByPhone($phone);
             $result = $registryObject['mapper']->map($data);
             $totalResult[] = $result;
-            $this->updateSearchRequestSetResult($searchRequest, (array)$result);
+            $this->updateSearchRequestSetResult($searchRequest, $data);
         }
         $this->setOutput('search_requests', $searchRequests);
         $this->setOutput('result', $totalResult);
@@ -67,7 +67,6 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $entity->setRequestDateTime(new \DateTime());
         $entity->setResultAliasSource($alias);
         $entity->setStatus('init');
-        $entity->setRequestSearchResults([]);
         $this->searchRequestRepository->saveEntity($entity);
         return $entity;
     }
@@ -90,12 +89,13 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         if($countryCode == '') throw new RequiredPhoneException('Country Code is required');
     }
 
-    protected function getCachedResultsByAliases(string $searchGroupHash): array
+    protected function getCachedResultsByHash(string $searchGroupHash): array
     {
         $cachedResultsByAliases = [];
         $cachedResults = $this->searchRequestRepository->getByHash($searchGroupHash, 'done');
 
         if ($cachedResults) {
+            var_dump($cachedResults);
             foreach ($cachedResults as $cachedResult) {
                 $cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
             }

@@ -11,10 +11,13 @@ use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasExceptio
 use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestOtherDataListResult;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySearchRequestRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
+use phpDocumentor\Reflection\Types\Array_;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use WabLab\DI\DI;
@@ -26,8 +29,8 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
     {
         $wablabDi = new DI();
         $registryObj = new DataSourceRegistry();
-        $registryObj->register('Test Data List', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
-        $registryObj->register('Another Test Data List', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
+        $registryObj->register('source1', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
+        $registryObj->register('source2', new TestOtherDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
 
         $di->make(Argument::any(), Argument::any())->will(function ($args) use ($wablabDi) {
             $alias = $args[0];
@@ -47,10 +50,11 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $result = $this->inputs([
             'phone' => '+970599189357',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List']
+            'searchAliases' => ['source1']
         ])->process()->output('result');
 
         $result->shouldHaveCount(1);
+        $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
         $result->offsetGet(0)->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
         $result->offsetGet(0)->getPhone()->shouldBe('+970599189357');
     }
@@ -60,7 +64,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $result = $this->inputs([
             'phone' => '+970599189357',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List', 'Another Test Data List']
+            'searchAliases' => ['source1', 'source2']
         ])->process()->output('result');
 
         $result->shouldHaveCount(2);
@@ -73,7 +77,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $this->inputs([
             'phone' => '',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List']
+            'searchAliases' => ['source1']
         ]);
 
         $this->shouldThrow(RequiredPhoneException::class)->duringProcess();
@@ -95,7 +99,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $this->inputs([
             'phone' => '+970599189357',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List']
+            'searchAliases' => ['source1']
         ])->process()->output('search_requests')->shouldHaveCount(1);
     }
 
@@ -104,7 +108,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $this->inputs([
             'phone' => '+970599189357',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List', 'Another Test Data List']
+            'searchAliases' => ['source1', 'source2']
         ])->process()->output('search_requests')->shouldHaveCount(2);
     }
 
@@ -113,7 +117,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $this->inputs([
             'phone' => '+970599189357',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List']
+            'searchAliases' => ['source1']
         ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
     }
 
@@ -122,7 +126,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $result = $this->inputs([
             'phone' => '+970599189357',
             'countryCode' => 'PS',
-            'searchAliases' => ['Test Data List']
+            'searchAliases' => ['source1']
         ])->process()->output('search_requests');
 
         $result->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['phone' => '+970599189357', 'countryCode' => 'PS'])));
@@ -131,7 +135,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
 
     public function it_should_add_result_for_search_requests_into_cache()
     {
-        $searchAliases = ['Test Data List', 'Another Test Data List'];
+        $searchAliases = ['source1', 'source2'];
         $phone = '+970599189357';
         $countryCode = 'PS';
 
@@ -146,12 +150,49 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $result->getHash()->shouldBe($hash);
         $result->getIsFromCache()->shouldBe(false);
 
+//        $this->inputs([
+//            'phone' => $phone,
+//            'countryCode' => 'PS',
+//            'searchAliases' => $searchAliases
+//        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
+
+    }
+
+    public function it_should_return_search_request_record_if_data_was_received()
+    {
+        $searchAliases = ['source1', 'source2'];
+        $phone = '+970599189357';
+        $countryCode = 'PS';
+
         $this->inputs([
             'phone' => $phone,
-            'countryCode' => 'PS',
+            'countryCode' => $countryCode,
             'searchAliases' => $searchAliases
-        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
+        ])->process()->output('search_requests')->offsetGet(0)->shouldBeAnInstanceOf(ISearchRequestEntity::class);
+    }
 
+    public function it_should_get_data_from_cache_when_service_requested()
+    {
+        $searchAliases = ['source1', 'source2'];
+        $phone = '+970599189357';
+        $countryCode = 'PS';
+        $result = $this->inputs([
+            'phone' => $phone,
+            'countryCode' => $countryCode,
+            'searchAliases' => $searchAliases
+        ])->process()->output('result');
+
+//        $repo = new DummySpamPhoneScoreRepository();
+//        foreach ($result->getWrappedObject() as $item) {
+//            $repo->saveEntity($item);
+//        }
+
+        $this->inputs([
+            'phone' => $phone,
+            'countryCode' => $countryCode,
+            'searchAliases' => $searchAliases
+        ])->process();
+        //->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
     }
 
 }

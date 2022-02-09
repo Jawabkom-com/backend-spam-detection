@@ -14,19 +14,19 @@ class TestDataListResult implements ISpamPhoneDataSource
 
     public function getDataSourceName(): string
     {
-        return 'Test Data List';
+        return 'source1';
     }
 
     public function getByPhone(string $normalizedPhoneNumber): mixed
     {
         return json_decode(<<<JSON
                 { "id": 1,
-                "name": "Mamdouh Zaqout",
+                "name": "Mamdouh Mohammed Zaqout",
                 "username": "Mamdouh",
                 "score": 20.0,
                 "country_code": "PS",
-                "source": "Test Date List",
-                "email": "mamdouhzaq@gmail.com",
+                "source": "source1",
+                "email": "mamdouhzaq@hotmail.com",
                 "phone": "{$normalizedPhoneNumber}"
                 }
                 JSON, true);

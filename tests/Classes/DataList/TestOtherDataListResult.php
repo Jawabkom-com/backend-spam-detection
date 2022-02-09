@@ -14,7 +14,7 @@ class TestOtherDataListResult implements ISpamPhoneDataSource
 
     public function getDataSourceName(): string
     {
-        return 'Another Test Data List';
+        return 'source2';
     }
 
     public function getByPhone(string $normalizedPhoneNumber): mixed
@@ -24,6 +24,9 @@ class TestOtherDataListResult implements ISpamPhoneDataSource
                 "name": "Mamdouh Zaqout",
                 "username": "Mamdouh",
                 "email": "mamdouhzaq@gmail.com",
+                "source": "source2",
+                "score": 50,
+                "country_code": "PS",
                 "phone": "{$normalizedPhoneNumber}",
                 "spam": "No"
                 }
