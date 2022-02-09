@@ -31,7 +31,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $registryObj = new DataSourceRegistry();
         $registryObj->register('source1', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
         $registryObj->register('source2', new TestOtherDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
-        $wablabDi->register(ISearchRequestEntity::class, new DummySearchRequestEntity());
+        $wablabDi->register(ISearchRequestEntity::class, DummySearchRequestEntity::class);
 
         $di->make(Argument::any(), Argument::any())->will(function ($args) use ($wablabDi) {
             $alias = $args[0];
