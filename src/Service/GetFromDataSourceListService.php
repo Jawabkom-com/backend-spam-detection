@@ -60,13 +60,14 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
 
     protected function initSearchRequest(string $hash, string $alias): ISearchRequestEntity
     {
-        $entity = $this->searchRequestEntity;
+        $entity = $this->di->make(ISearchRequestEntity::class);
         $entity->setIsFromCache(false);
         $entity->setHash($hash);
         $entity->setMatchesCount(1);
         $entity->setRequestDateTime(new \DateTime());
         $entity->setResultAliasSource($alias);
         $entity->setStatus('init');
+        $entity->setRequestSearchResults([]);
         $this->searchRequestRepository->saveEntity($entity);
         return $entity;
     }
@@ -95,7 +96,6 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         $cachedResults = $this->searchRequestRepository->getByHash($searchGroupHash, 'done');
 
         if ($cachedResults) {
-            var_dump($cachedResults);
             foreach ($cachedResults as $cachedResult) {
                 $cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
             }

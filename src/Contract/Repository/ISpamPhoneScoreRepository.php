@@ -8,5 +8,11 @@ interface ISpamPhoneScoreRepository
 {
     public function saveEntity(ISpamPhoneScoreEntity $entity):void;
     public function getByPhoneCountryCodeAndSource($phone, $source, $countryCode): ?ISpamPhoneScoreEntity;
-    public function getAll();
+
+    /**
+     * @param $phone
+     * @param $countryCode
+     * @return ISpamPhoneScoreEntity[]|null
+     */
+    public function getByPhoneCountryCode(string $phone, string $countryCode): ?array;
 }

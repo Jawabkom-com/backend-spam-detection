@@ -31,6 +31,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $registryObj = new DataSourceRegistry();
         $registryObj->register('source1', new TestDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
         $registryObj->register('source2', new TestOtherDataListResult(), new DataListMapper(new DummySpamPhoneScoreEntity()));
+        $wablabDi->register(ISearchRequestEntity::class, new DummySearchRequestEntity());
 
         $di->make(Argument::any(), Argument::any())->will(function ($args) use ($wablabDi) {
             $alias = $args[0];
@@ -176,23 +177,20 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $searchAliases = ['source1', 'source2'];
         $phone = '+970599189357';
         $countryCode = 'PS';
-        $result = $this->inputs([
-            'phone' => $phone,
-            'countryCode' => $countryCode,
-            'searchAliases' => $searchAliases
-        ])->process()->output('result');
-
-//        $repo = new DummySpamPhoneScoreRepository();
-//        foreach ($result->getWrappedObject() as $item) {
-//            $repo->saveEntity($item);
-//        }
 
         $this->inputs([
             'phone' => $phone,
             'countryCode' => $countryCode,
             'searchAliases' => $searchAliases
-        ])->process();
-        //->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
+        ])->process()->output('result');
+
+        $all = new DummySearchRequestRepository();
+        print_r($all->getAll());
+//        $this->inputs([
+//            'phone' => $phone,
+//            'countryCode' => $countryCode,
+//            'searchAliases' => $searchAliases
+//        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
     }
 
 }
