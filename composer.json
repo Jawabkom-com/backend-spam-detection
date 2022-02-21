@@ -22,7 +22,7 @@
     "require-dev": {
         "phpspec/phpspec": "^7.1",
         "phpunit/phpunit": "^9.5",
-        "wablab-com/di": "^0.0.1",
+        "wablab-com/di": "^0.0",
         "rakibtg/sleekdb": "^2.13"
     }
 }

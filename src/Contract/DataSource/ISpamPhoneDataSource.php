@@ -8,5 +8,5 @@ interface ISpamPhoneDataSource
 
     public function getDataSourceName():string;
 
-    public function getByPhone(string $normalizedPhoneNumber):mixed;
+    public function getByPhone(string $normalizedPhoneNumber, ?string $countryCode = null):mixed;
 }

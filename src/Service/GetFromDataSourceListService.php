@@ -6,8 +6,10 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegist
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasException;
+use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
 use Jawabkom\Standard\Abstract\AbstractService;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 
@@ -15,15 +17,25 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
 {
     private IDataSourceRegistry $dataSourceRegistry;
     private ISearchRequestRepository $searchRequestRepository;
-    private ISearchRequestEntity $searchRequestEntity;
+
+    protected array $inputAllowedKeys = ['searchAliases', 'phone', 'countryCode'];
+    protected string $searchHashGroup = '';
+    protected array $cachedResultsByAliases = [];
+    protected string $normalizedPhoneNumber;
+    protected array $searchResultsByAlias = [];
+    /**
+     * @var ISearchRequestEntity[]
+     */
+    protected array $searchRequests = [];
+    protected array $errorsByAliases = [];
+    protected array $mappedSearchResults = [];
 
     public function __construct(IDependencyInjector $di, IDataSourceRegistry $dataSourceRegistry,
-                                ISearchRequestRepository $searchRequestRepository, ISearchRequestEntity $searchRequestEntity)
+                                ISearchRequestRepository $searchRequestRepository)
     {
         parent::__construct($di);
         $this->dataSourceRegistry = $dataSourceRegistry;
         $this->searchRequestRepository = $searchRequestRepository;
-        $this->searchRequestEntity = $searchRequestEntity;
     }
 
     /**
@@ -32,29 +44,18 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
      */
     public function process(): static
     {
-        $searchAliases = $this->getInput('searchAliases');
-        $phone = $this->getInput('phone');
-        $countryCode = $this->getInput('countryCode');
+        $this
+            ->validateInputs()
+            ->prepareNormalizedPhoneNumber()
+            ->generateSearchHashGroup()
+            ->fetchCachedResultsByHash()
+            ->initSearchRequests()
+            ->fetchSearchResults()
+            ->updateSearchRequests()
+            ->mapSearchResults();
 
-        $this->validateInputs($searchAliases, $phone, $countryCode);
-
-        $searchGroupHash = md5(json_encode(['phone' => $phone, 'countryCode' => $countryCode]));
-        $cachedResultsByHash = $this->getCachedResultsByHash($searchGroupHash);
-
-        $totalResult = [];
-        $searchRequests = [];
-
-        foreach ($searchAliases as $alias) {
-            $searchRequests[] = $searchRequest = $this->initSearchRequest($searchGroupHash, $alias);
-            $registryObject = $this->dataSourceRegistry->getRegistry($alias);
-            $sourceObject = $registryObject['source'];
-            $data = $sourceObject->getByPhone($phone);
-            $result = $registryObject['mapper']->map($data);
-            $totalResult[] = $result;
-            $this->updateSearchRequestSetResult($searchRequest, $data);
-        }
-        $this->setOutput('search_requests', $searchRequests);
-        $this->setOutput('result', $totalResult);
+        $this->setOutput('search_requests', $this->searchResultsByAlias);
+        $this->setOutput('result', $this->mappedSearchResults);
         return $this;
     }
 
@@ -72,48 +73,101 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         return $entity;
     }
 
-    protected function updateSearchRequestSetResult(ISearchRequestEntity $entity, $result)
+    protected function updateSearchRequests():static
     {
-        $entity->setRequestSearchResults($result);
-        $entity->setStatus('done');
-        $this->searchRequestRepository->saveEntity($entity);
+        foreach ($this->getInput('searchAliases', []) as $alias) {
+            if(isset($this->searchResultsByAlias[$alias])) {
+                $this->searchRequests[$alias]->setRequestSearchResults($this->searchResultsByAlias[$alias]);
+                $this->searchRequests[$alias]->setStatus('done');
+            } elseif(isset($this->errorsByAliases[$alias])) {
+                $this->searchRequests[$alias]->addError($this->errorsByAliases[$alias]);
+                $this->searchRequests[$alias]->setStatus('error');
+            } else {
+                throw new \Exception('No error nor result could be found for alias '.$alias);
+            }
+
+            $this->searchRequestRepository->saveEntity($this->searchRequests[$alias]);
+        }
+        return $this;
     }
 
-    /**
-     * @throws RequiredPhoneException
-     * @throws RequiredSearchAliasException
-     */
-    protected function validateInputs($searchAliases, $phone, $countryCode)
+    protected function validateInputs():static
     {
-        if(empty($searchAliases)) throw new RequiredSearchAliasException('Search aliases are required, please provide one at minimum');
-        if($phone == '') throw new RequiredPhoneException('Phone is required');
-        if($countryCode == '') throw new RequiredPhoneException('Country Code is required');
+        foreach($this->inputAllowedKeys as $key => $value) {
+            if(empty($this->getInput($key)))
+                throw new RequiredInputsException($key.' are required');
+        }
+        return $this;
     }
 
-    protected function getCachedResultsByHash(string $searchGroupHash): array
+    protected function initSearchRequests():static
     {
-        $cachedResultsByAliases = [];
-        $cachedResults = $this->searchRequestRepository->getByHash($searchGroupHash, 'done');
+        foreach ($this->getInput('searchAliases', []) as $alias) {
+            $this->searchRequests[$alias] = $this->initSearchRequest($this->searchHashGroup, $alias);
+        }
+        return $this;
+    }
 
-        if ($cachedResults) {
-            foreach ($cachedResults as $cachedResult) {
-                $cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
+    protected function fetchSearchResults():static
+    {
+        foreach ($this->getInput('searchAliases', []) as $alias) {
+            if(isset($this->cachedResultsByAliases[$alias])) {
+                $this->searchResultsByAlias[$alias] = $this->cachedResultsByAliases[$alias];
+            } else {
+                try {
+                    $registryObject = $this->dataSourceRegistry->getRegistry($alias);
+                    $sourceObject = $registryObject['source'];
+                    $this->searchResultsByAlias[$alias] = $sourceObject->getByPhone($this->normalizedPhoneNumber, $this->getInput('countryCode'));
+                } catch (\Throwable $exception) {
+                    $this->errorsByAliases[$alias] = $exception->getMessage();
+                }
             }
         }
-        return $cachedResultsByAliases;
+        return $this;
     }
 
-    protected function getSearchResults(bool $isFromCache, mixed $alias, string $phone, $cachedResultsByAliases): mixed
+    protected function prepareNormalizedPhoneNumber():static
     {
-        if (!$isFromCache) {
-            $registryObject = $this->dataSourceRegistry->getRegistry($alias);
-            $sourceObject = $registryObject['source'];
-            $data = $sourceObject->getByPhone($phone);
-            $results = $registryObject['mapper']->map($data);
-        } else {
-            $results = $cachedResultsByAliases[$alias];
+        $phoneLib = new Phone();
+        $possibleCountries = [];
+        if($this->getInput('countryCode'))
+            $possibleCountries = [$this->getInput('countryCode')];
+        $parsedPhoneNumber = $phoneLib->parse($this->getInput('phone'), $possibleCountries);
+        $this->normalizedPhoneNumber = $parsedPhoneNumber['phone'];
+        if($parsedPhoneNumber['is_value']) {
+            $this->input('countryCode', $parsedPhoneNumber['country_code']);
+            $this->input('phone', $parsedPhoneNumber['phone']);
         }
-        return $results;
+        return $this;
     }
+
+    protected function mapSearchResults(): static
+    {
+        foreach ($this->searchResultsByAlias as $alias => $result) {
+            $registryObject = $this->dataSourceRegistry->getRegistry($alias);
+            $this->mappedSearchResults[] = $registryObject['mapper']->map($result);
+        }
+        return $this;
+    }
+
+
+
+    protected function generateSearchHashGroup():static
+    {
+        $this->searchHashGroup = md5(json_encode(['phone' => $this->getInput('phone'), 'countryCode' => $this->getInput('countryCode')]));
+        return $this;
+    }
+
+    protected function fetchCachedResultsByHash(): static
+    {
+        $cachedResults = $this->searchRequestRepository->getByHash($this->searchHashGroup, 'done');
+        if ($cachedResults) {
+            foreach ($cachedResults as $cachedResult) {
+                $this->cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
+            }
+        }
+        return $this;
+    }
+
 
 }
