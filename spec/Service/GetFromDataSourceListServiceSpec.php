@@ -185,7 +185,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         ])->process()->output('result');
 
         $all = new DummySearchRequestRepository();
-        print_r($all->getAll());
+        //print_r($all->getAll());
 //        $this->inputs([
 //            'phone' => $phone,
 //            'countryCode' => $countryCode,
