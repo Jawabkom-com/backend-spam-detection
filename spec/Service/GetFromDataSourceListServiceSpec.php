@@ -2,12 +2,10 @@
 
 namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
-use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
-use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
-use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredSearchAliasException;
+use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestDataListResult;
@@ -15,9 +13,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestOtherDataLi
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySearchRequestRepository;
-use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
-use phpDocumentor\Reflection\Types\Array_;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use WabLab\DI\DI;
@@ -81,7 +77,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'searchAliases' => ['source1']
         ]);
 
-        $this->shouldThrow(RequiredPhoneException::class)->duringProcess();
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
     }
 
     public function it_should_throw_exception_if_no_search_aliases_provided()
@@ -92,7 +88,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'searchAliases' => []
         ]);
 
-        $this->shouldThrow(RequiredSearchAliasException::class)->duringProcess();
+        $this->shouldThrow(RequiredInputsException::class)->duringProcess();
     }
 
     public function it_should_return_single_search_request_object_when_search_done()

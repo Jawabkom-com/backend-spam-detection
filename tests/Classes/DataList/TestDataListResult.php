@@ -17,7 +17,7 @@ class TestDataListResult implements ISpamPhoneDataSource
         return 'source1';
     }
 
-    public function getByPhone(string $normalizedPhoneNumber): mixed
+    public function getByPhone(string $normalizedPhoneNumber, ?string $countryCode = null): mixed
     {
         return json_decode(<<<JSON
                 { "id": 1,

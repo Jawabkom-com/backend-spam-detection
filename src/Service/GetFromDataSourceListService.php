@@ -93,7 +93,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
 
     protected function validateInputs():static
     {
-        foreach($this->inputAllowedKeys as $key => $value) {
+        foreach($this->inputAllowedKeys as $key) {
             if(empty($this->getInput($key)))
                 throw new RequiredInputsException($key.' are required');
         }
@@ -134,7 +134,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             $possibleCountries = [$this->getInput('countryCode')];
         $parsedPhoneNumber = $phoneLib->parse($this->getInput('phone'), $possibleCountries);
         $this->normalizedPhoneNumber = $parsedPhoneNumber['phone'];
-        if($parsedPhoneNumber['is_value']) {
+        if($parsedPhoneNumber['is_valid']) {
             $this->input('countryCode', $parsedPhoneNumber['country_code']);
             $this->input('phone', $parsedPhoneNumber['phone']);
         }
@@ -149,8 +149,6 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         }
         return $this;
     }
-
-
 
     protected function generateSearchHashGroup():static
     {
