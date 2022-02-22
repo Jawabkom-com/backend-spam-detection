@@ -2,6 +2,7 @@
 
 namespace spec\Jawabkom\Backend\Module\Spam\Detection\Facade;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Library\ISpamPhoneScoreEntitiesDigester;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRepository;
@@ -36,7 +37,7 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
             return $tmpDi->make($alias, $aliasArgs);
         });
         $diObj = $di->getWrappedObject();
-        $this->wablabDi->register(IDependencyInjector::class, $di);
+        $this->wablabDi->register(IDependencyInjector::class, $diObj);
         $this->beConstructedWith($diObj);
     }
 
@@ -68,8 +69,8 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $this->registerMockedDataSourceRegister($registry);
         $this->registerMockedSearchRequestRepository($searchRequestRepository);
 
-        //$entity = $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
-        //$entity->getScore()->shouldBe(200.00);
+        $entity = $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
+        $entity->getScore()->shouldBe(200.00);
     }
 
 
@@ -132,5 +133,6 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
     {
         $this->wablabDi->register(ISearchRequestRepository::class, $searchRequestRepository->getWrappedObject());
     }
+
 
 }
