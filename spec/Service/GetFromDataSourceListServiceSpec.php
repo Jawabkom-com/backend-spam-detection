@@ -4,6 +4,7 @@ namespace spec\Jawabkom\Backend\Module\Spam\Detection\Service;
 
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Mappers\DataListMapper;
@@ -13,6 +14,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\DataList\TestOtherDataLi
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySearchRequestRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -35,7 +37,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             return $wablabDi->make($alias, $aliasArgs);
         });
         DummySearchRequestRepository::$DB = [];
-        $this->beConstructedWith($di->getWrappedObject(), $registryObj, new DummySearchRequestRepository(), new DummySearchRequestEntity());
+        $this->beConstructedWith($di->getWrappedObject(), $registryObj, new DummySearchRequestRepository(), new DummySpamPhoneScoreRepository());
     }
 
     function it_is_initializable()
@@ -186,6 +188,30 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'countryCode' => $countryCode,
             'searchAliases' => $searchAliases
         ])->process()->output('search_requests')->offsetGet('source1')->getIsFromCache()->shouldBe(true);
+    }
+
+    public function it_should_store_phone_score_record_when_data_is_provided(ISpamPhoneScoreRepository $phoneScoreRepository)
+    {
+        $searchAliases = ['source1', 'source2'];
+        $phone = '+970599189357';
+        $countryCode = 'PS';
+
+        $result = $this->inputs([
+            'phone' => $phone,
+            'countryCode' => $countryCode,
+            'searchAliases' => $searchAliases
+        ])->process()->output('result')->offsetGet(0)->getWrappedObject();
+
+        $entity = new DummySpamPhoneScoreEntity();
+        $entity->setPhone($result->getPhone());
+        $entity->setSource($result->getSource());
+        $entity->setScore($result->getScore());
+        $entity->setCountryCode($result->getCountryCode());
+        $entity->setCreatedDateTime($result->getCreatedDateTime());
+
+        $phoneScoreRepository->saveEntity($entity)->shouldBeCalled();
+        //$record = $phoneScoreRepository->getByPhoneCountryCodeAndSource($phone, 'source1', $countryCode);
+        //var_dump($record);
     }
 
 }

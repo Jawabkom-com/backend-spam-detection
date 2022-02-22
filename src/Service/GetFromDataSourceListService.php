@@ -5,6 +5,7 @@ namespace Jawabkom\Backend\Module\Spam\Detection\Service;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredInputsException;
 use Jawabkom\Backend\Module\Spam\Detection\Exception\RequiredPhoneException;
@@ -29,13 +30,15 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     protected array $searchRequests = [];
     protected array $errorsByAliases = [];
     protected array $mappedSearchResults = [];
+    protected ISpamPhoneScoreRepository $phoneScoreRepository;
 
     public function __construct(IDependencyInjector $di, IDataSourceRegistry $dataSourceRegistry,
-                                ISearchRequestRepository $searchRequestRepository)
+                                ISearchRequestRepository $searchRequestRepository, ISpamPhoneScoreRepository $phoneScoreRepository)
     {
         parent::__construct($di);
         $this->dataSourceRegistry = $dataSourceRegistry;
         $this->searchRequestRepository = $searchRequestRepository;
+        $this->phoneScoreRepository = $phoneScoreRepository;
     }
 
     /**
@@ -52,7 +55,8 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             ->initSearchRequests()
             ->fetchSearchResults()
             ->updateSearchRequests()
-            ->mapSearchResults();
+            ->mapSearchResults()
+            ->savePhoneScoreRecord();
 
         $this->setOutput('search_requests', $this->searchRequests);
         $this->setOutput('result', $this->mappedSearchResults);
@@ -149,6 +153,15 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             $registryObject = $this->dataSourceRegistry->getRegistry($alias);
             $this->mappedSearchResults[] = $registryObject['mapper']->map($result);
         }
+        return $this;
+    }
+
+    protected function savePhoneScoreRecord(): static
+    {
+        foreach ($this->mappedSearchResults as $entity) {
+            $this->phoneScoreRepository->saveEntity($entity);
+        }
+
         return $this;
     }
 
