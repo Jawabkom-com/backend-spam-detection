@@ -115,7 +115,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'phone' => '+970599189357',
             'countryCode' => 'PS',
             'searchAliases' => ['source1']
-        ])->process()->output('search_requests')->offsetGet(0)->getStatus()->shouldBe('done');
+        ])->process()->output('search_requests')->offsetGet('source1')->getStatus()->shouldBe('done');
     }
 
     public function it_should_return_right_hash_value_if_no_data_missing()
@@ -126,8 +126,8 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'searchAliases' => ['source1']
         ])->process()->output('search_requests');
 
-        $result->offsetGet(0)->getHash()->shouldBe(md5(json_encode(['phone' => '+970599189357', 'countryCode' => 'PS'])));
-        $result->offsetGet(0)->getIsFromCache()->shouldBe(false);
+        $result->offsetGet('source1')->getHash()->shouldBe(md5(json_encode(['phone' => '+970599189357', 'countryCode' => 'PS'])));
+        $result->offsetGet('source1')->getIsFromCache()->shouldBe(false);
     }
 
     public function it_should_add_result_for_search_requests_into_cache()
@@ -142,7 +142,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'phone' => $phone,
             'countryCode' => 'PS',
             'searchAliases' => $searchAliases
-        ])->process()->output('search_requests')->offsetGet(0);
+        ])->process()->output('search_requests')->offsetGet('source1');
 
         $result->getHash()->shouldBe($hash);
         $result->getIsFromCache()->shouldBe(false);
@@ -161,11 +161,11 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $phone = '+970599189357';
         $countryCode = 'PS';
 
-        $this->inputs([
+        $results = $this->inputs([
             'phone' => $phone,
             'countryCode' => $countryCode,
             'searchAliases' => $searchAliases
-        ])->process()->output('search_requests')->offsetGet(0)->shouldBeAnInstanceOf(ISearchRequestEntity::class);
+        ])->process()->output('search_requests')->offsetGet('source1')->shouldBeAnInstanceOf(ISearchRequestEntity::class);
     }
 
     public function it_should_get_data_from_cache_when_service_requested()

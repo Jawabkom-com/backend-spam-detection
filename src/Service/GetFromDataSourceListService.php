@@ -54,7 +54,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             ->updateSearchRequests()
             ->mapSearchResults();
 
-        $this->setOutput('search_requests', $this->searchResultsByAlias);
+        $this->setOutput('search_requests', $this->searchRequests);
         $this->setOutput('result', $this->mappedSearchResults);
         return $this;
     }
