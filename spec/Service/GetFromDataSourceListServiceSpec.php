@@ -34,6 +34,7 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             $aliasArgs = $args[1] ?? [];
             return $wablabDi->make($alias, $aliasArgs);
         });
+        DummySearchRequestRepository::$DB = [];
         $this->beConstructedWith($di->getWrappedObject(), $registryObj, new DummySearchRequestRepository(), new DummySearchRequestEntity());
     }
 
@@ -180,13 +181,11 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
             'searchAliases' => $searchAliases
         ])->process()->output('result');
 
-        $all = new DummySearchRequestRepository();
-        //print_r($all->getAll());
-//        $this->inputs([
-//            'phone' => $phone,
-//            'countryCode' => $countryCode,
-//            'searchAliases' => $searchAliases
-//        ])->process()->output('search_requests')->offsetGet(0)->getIsFromCache()->shouldBe(true);
+        $this->inputs([
+            'phone' => $phone,
+            'countryCode' => $countryCode,
+            'searchAliases' => $searchAliases
+        ])->process()->output('search_requests')->offsetGet('source1')->getIsFromCache()->shouldBe(true);
     }
 
 }

@@ -113,6 +113,8 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
         foreach ($this->getInput('searchAliases', []) as $alias) {
             if(isset($this->cachedResultsByAliases[$alias])) {
                 $this->searchResultsByAlias[$alias] = $this->cachedResultsByAliases[$alias];
+                $this->searchRequests[$alias]->setIsFromCache(true);
+                $this->searchRequestRepository->saveEntity($this->searchRequests[$alias]);
             } else {
                 try {
                     $registryObject = $this->dataSourceRegistry->getRegistry($alias);
