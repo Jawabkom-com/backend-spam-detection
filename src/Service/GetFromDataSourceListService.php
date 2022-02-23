@@ -55,8 +55,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             ->initSearchRequests()
             ->fetchSearchResults()
             ->updateSearchRequests()
-            ->mapSearchResults()
-            ->savePhoneScoreRecord();
+            ->mapSearchResults();
 
         $this->setOutput('search_requests', $this->searchRequests);
         $this->setOutput('result', $this->mappedSearchResults);
@@ -153,15 +152,6 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
             $registryObject = $this->dataSourceRegistry->getRegistry($alias);
             $this->mappedSearchResults[] = $registryObject['mapper']->map($result);
         }
-        return $this;
-    }
-
-    protected function savePhoneScoreRecord(): static
-    {
-        foreach ($this->mappedSearchResults as $entity) {
-            $this->phoneScoreRepository->saveEntity($entity);
-        }
-
         return $this;
     }
 

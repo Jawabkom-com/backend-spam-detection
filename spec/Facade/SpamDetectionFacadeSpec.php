@@ -15,6 +15,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Standard\Contract\IDependencyInjector;
+use phpDocumentor\Reflection\Types\Iterable_;
 use PhpSpec\ObjectBehavior;
 use PhpSpec\Wrapper\Collaborator;
 use Prophecy\Argument;
@@ -69,14 +70,12 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
     }
 
     public function it_should_merge_online_search_results_with_offline_results_when_searcher_aliases_provided(ISpamPhoneScoreRepository $repository, ISpamPhoneScoreEntitiesDigester $digester,
-                                                                                                              IDataSourceRegistry $registry, ISearchRequestRepository $searchRequestRepository,
-                                                                                                              IGetFromDataSourceListService $getFromDataSourceListService)
+                                                                                                              IDataSourceRegistry $registry, ISearchRequestRepository $searchRequestRepository)
     {
         $this->registerMockedRepositoryWithTwoEntitiesToReturn($repository);
         $this->registerMockedDigester($digester);
         $this->registerMockedDataSourceRegister($registry);
         $this->registerMockedSearchRequestRepository($searchRequestRepository);
-        //$this->registerMockedGetFromDataSourceList($getFromDataSourceListService);
 
         $entity = $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
         $entity->getScore()->shouldBe(200.00);
@@ -135,36 +134,79 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
 
     protected function registerMockedDataSourceRegister(IDataSourceRegistry|Collaborator $registry):void
     {
-        $registry->getRegistry('test_searcher_alias1')->will(function($args){
+        $registry->getRegistry('test_searcher_alias1')->will(function(){
                 $ph = new Prophet();
                 $searcher = $ph->prophesize(ISpamPhoneDataSource::class);
-                $searcher->getByPhone('+962788888888', 'JO')->willReturn('any data to be mapped');
 
-                $mapper = $ph->prophesize(ISpamPhoneDataSourceToEntityMapper::class);
+                $searcher->getByPhone('+962788888888', 'JO')->willReturn([
+                    'phone' => '+962788888888',
+                    'country_code' => 'JO',
+                    'tags' => null,
+                    'score' => 50,
+                    'source' => 'test_searcher_alias1'
+                ]);
+
+                $mapperObj = $ph->prophesize(ISpamPhoneDataSourceToEntityMapper::class);
+
+                $mapperObj->map([
+                    'phone' => '+962788888888',
+                    'country_code' => 'JO',
+                    'tags' => null,
+                    'score' => 50,
+                    'source' => 'test_searcher_alias1'
+                ])->will(function(){
+                    $entity = new DummySpamPhoneScoreEntity();
+                    $entity->setPhone('+962788888888');
+                    $entity->setCountryCode('JO');
+                    $entity->setScore(50);
+                    $entity->setSource('test_searcher_alias1');
+                    return $entity;
+                });
+
                 return [
                     'source' => $searcher,
-                    'mapper' =>
+                    'mapper' => $mapperObj
                 ];
         });
-
-        $registry->getRegistry('test_searcher_alias2')->will(function($args){
+        $registry->getRegistry('test_searcher_alias2')->will(function(){
             $ph = new Prophet();
             $searcher = $ph->prophesize(ISpamPhoneDataSource::class);
-            $searcher->getByPhone('+962788888888', 'JO')->willReturn('any data to be mapped');
-            return ['source' => $searcher];
-        });
+            $searcher->getByPhone('+962788888888', 'JO')->willReturn([
+                'phone' => '+962788888888',
+                'country_code' => 'JO',
+                'tags' => null,
+                'score' => 50,
+                'source' => 'test_searcher_alias2'
+            ]);
 
+            $mapperObj = $ph->prophesize(ISpamPhoneDataSourceToEntityMapper::class);
+            $mapperObj->map([
+                'phone' => '+962788888888',
+                'country_code' => 'JO',
+                'tags' => null,
+                'score' => '50',
+                'source' => 'test_searcher_alias2'
+            ])->will(function(){
+                $entity = new DummySpamPhoneScoreEntity();
+                $entity->setPhone('+962788888888');
+                $entity->setCountryCode('JO');
+                $entity->setScore(50);
+                $entity->setSource('test_searcher_alias2');
+                return $entity;
+            });
+
+
+            return [
+                'source' => $searcher,
+                'mapper' => $mapperObj
+            ];
+        });
         $this->wablabDi->register(IDataSourceRegistry::class, $registry->getWrappedObject());
     }
 
     protected function registerMockedSearchRequestRepository(ISearchRequestRepository|Collaborator $searchRequestRepository):void
     {
         $this->wablabDi->register(ISearchRequestRepository::class, $searchRequestRepository->getWrappedObject());
-    }
-
-    protected function registerMockedGetFromDataSourceList(IGetFromDataSourceListService|Collaborator $getFromDataSourceListService):void
-    {
-        $this->wablabDi->register(IGetFromDataSourceListService::class, $getFromDataSourceListService->getWrappedObject());
     }
 
 }
