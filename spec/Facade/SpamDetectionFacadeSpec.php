@@ -3,6 +3,7 @@
 namespace spec\Jawabkom\Backend\Module\Spam\Detection\Facade;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSource;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSourceToEntityMapper;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Library\ISpamPhoneScoreEntitiesDigester;
@@ -137,12 +138,20 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $registry->getRegistry('test_searcher_alias1')->will(function($args){
                 $ph = new Prophet();
                 $searcher = $ph->prophesize(ISpamPhoneDataSource::class);
-                $searcher->getByPhone()->willReturn();
+                $searcher->getByPhone('+962788888888', 'JO')->willReturn('any data to be mapped');
+
+                $mapper = $ph->prophesize(ISpamPhoneDataSourceToEntityMapper::class);
+                return [
+                    'source' => $searcher,
+                    'mapper' =>
+                ];
         });
 
-        $registry->getRegistry('test_searcher_alias1')->will(function($args){
+        $registry->getRegistry('test_searcher_alias2')->will(function($args){
             $ph = new Prophet();
-            $searcher2 = $ph->prophesize(ISpamPhoneDataSource::class);
+            $searcher = $ph->prophesize(ISpamPhoneDataSource::class);
+            $searcher->getByPhone('+962788888888', 'JO')->willReturn('any data to be mapped');
+            return ['source' => $searcher];
         });
 
         $this->wablabDi->register(IDataSourceRegistry::class, $registry->getWrappedObject());
