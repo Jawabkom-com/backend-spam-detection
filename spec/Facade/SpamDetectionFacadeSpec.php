@@ -2,18 +2,22 @@
 
 namespace spec\Jawabkom\Backend\Module\Spam\Detection\Facade;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\IDataSourceRegistry;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\DataSource\ISpamPhoneDataSource;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Library\ISpamPhoneScoreEntitiesDigester;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 use PhpSpec\ObjectBehavior;
 use PhpSpec\Wrapper\Collaborator;
 use Prophecy\Argument;
+use Prophecy\Prophet;
 use WabLab\DI\DI;
 
 class SpamDetectionFacadeSpec extends ObjectBehavior
@@ -25,6 +29,7 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $this->wablabDi = new DI();
         $this->wablabDi->register(ISpamPhoneScoreEntity::class, DummySpamPhoneScoreEntity::class);
         $this->wablabDi->register(IGetFromDataSourceListService::class, GetFromDataSourceListService::class);
+        $this->wablabDi->register(ISearchRequestEntity::class, DummySearchRequestEntity::class);
 
     }
 
@@ -62,12 +67,15 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $entity->shouldBeNull();
     }
 
-    public function it_should_merge_online_search_results_with_offline_results_when_searcher_aliases_provided(ISpamPhoneScoreRepository $repository, ISpamPhoneScoreEntitiesDigester $digester, IDataSourceRegistry $registry, ISearchRequestRepository $searchRequestRepository)
+    public function it_should_merge_online_search_results_with_offline_results_when_searcher_aliases_provided(ISpamPhoneScoreRepository $repository, ISpamPhoneScoreEntitiesDigester $digester,
+                                                                                                              IDataSourceRegistry $registry, ISearchRequestRepository $searchRequestRepository,
+                                                                                                              IGetFromDataSourceListService $getFromDataSourceListService)
     {
         $this->registerMockedRepositoryWithTwoEntitiesToReturn($repository);
         $this->registerMockedDigester($digester);
         $this->registerMockedDataSourceRegister($registry);
         $this->registerMockedSearchRequestRepository($searchRequestRepository);
+        //$this->registerMockedGetFromDataSourceList($getFromDataSourceListService);
 
         $entity = $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
         $entity->getScore()->shouldBe(200.00);
@@ -126,6 +134,17 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
 
     protected function registerMockedDataSourceRegister(IDataSourceRegistry|Collaborator $registry):void
     {
+        $registry->getRegistry('test_searcher_alias1')->will(function($args){
+                $ph = new Prophet();
+                $searcher = $ph->prophesize(ISpamPhoneDataSource::class);
+                $searcher->getByPhone()->willReturn();
+        });
+
+        $registry->getRegistry('test_searcher_alias1')->will(function($args){
+            $ph = new Prophet();
+            $searcher2 = $ph->prophesize(ISpamPhoneDataSource::class);
+        });
+
         $this->wablabDi->register(IDataSourceRegistry::class, $registry->getWrappedObject());
     }
 
@@ -134,5 +153,9 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $this->wablabDi->register(ISearchRequestRepository::class, $searchRequestRepository->getWrappedObject());
     }
 
+    protected function registerMockedGetFromDataSourceList(IGetFromDataSourceListService|Collaborator $getFromDataSourceListService):void
+    {
+        $this->wablabDi->register(IGetFromDataSourceListService::class, $getFromDataSourceListService->getWrappedObject());
+    }
 
 }
