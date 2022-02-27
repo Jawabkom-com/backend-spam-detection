@@ -11,10 +11,13 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRep
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IAddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\Service\AddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
+use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Repository\DummySpamPhoneScoreRepository;
 use Jawabkom\Standard\Contract\IDependencyInjector;
+use PhpParser\Node\Arg;
 use PhpSpec\ObjectBehavior;
 use PhpSpec\Wrapper\Collaborator;
 use Prophecy\Argument;
@@ -31,7 +34,7 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $this->wablabDi->register(ISpamPhoneScoreEntity::class, DummySpamPhoneScoreEntity::class);
         $this->wablabDi->register(IGetFromDataSourceListService::class, GetFromDataSourceListService::class);
         $this->wablabDi->register(ISearchRequestEntity::class, DummySearchRequestEntity::class);
-
+        $this->wablabDi->register(IAddUpdatePhoneSpamScoreService::class, AddUpdatePhoneSpamScoreService::class);
     }
 
     public function let(IDependencyInjector $di)
@@ -80,22 +83,26 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $entity->getScore()->shouldBe(200.00);
     }
 
-    public function it_should_store_search_results_in_the_database(ISpamPhoneScoreRepository $repository, ISpamPhoneScoreEntitiesDigester $digester,
-                                                            IDataSourceRegistry $registry, ISearchRequestRepository $searchRequestRepository,
-                                                                   IAddUpdatePhoneSpamScoreService $phoneSpamScoreService)
+    public function it_should_called_save_function_when_search_happened(ISpamPhoneScoreEntitiesDigester $digester,
+                                                            IDataSourceRegistry $registry, ISearchRequestRepository $searchRequestRepository,ISpamPhoneScoreRepository $phoneScoreRepository)
     {
-        $this->registerMockedRepositoryWithTwoEntitiesToReturn($repository);
+        $this->registerMockedSpamPhoneRepository($phoneScoreRepository);
         $this->registerMockedDigester($digester);
         $this->registerMockedDataSourceRegister($registry);
         $this->registerMockedSearchRequestRepository($searchRequestRepository);
-        $this->registerMockedPhoneSpamScoreService($phoneSpamScoreService);
-        $entity = $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
-        $entity->getScore()->shouldBe(200.00);
+        $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
+
+        $phoneScoreRepository->saveEntity(Argument::any())->shouldBeCalledTimes(2);
     }
 
     //
     // mock creators
     //
+
+    protected function registerMockedSpamPhoneRepository(ISpamPhoneScoreRepository|Collaborator $repository):void
+    {
+        $this->wablabDi->register(ISpamPhoneScoreRepository::class, $repository->getWrappedObject());
+    }
 
     protected function registerMockedRepositoryWithTwoEntitiesToReturn(ISpamPhoneScoreRepository|Collaborator $repository): void
     {
@@ -141,11 +148,6 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
             return $newEntity;
         });
         $this->wablabDi->register(ISpamPhoneScoreEntitiesDigester::class, $digester->getWrappedObject());
-    }
-
-    protected function registerMockedPhoneSpamScoreService(IAddUpdatePhoneSpamScoreService|Collaborator $service):void
-    {
-        $this->wablabDi->register(IAddUpdatePhoneSpamScoreService::class, $service->getWrappedObject());
     }
 
     protected function registerMockedDataSourceRegister(IDataSourceRegistry|Collaborator $registry):void

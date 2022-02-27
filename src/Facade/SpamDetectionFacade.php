@@ -43,10 +43,13 @@ class SpamDetectionFacade implements ISpamDetectionFacade
                 // store the result into repository
                 $phoneSpamScoreService = $this->di->make(IAddUpdatePhoneSpamScoreService::class);
                 foreach ($matchedEntities as $entity) {
-                    print_r($entity->getPhone());
-//                    $phoneSpamScoreService->inputs([
-//                        'phone' => $entity->getPhone()
-//                    ])->process();
+                    $phoneSpamScoreService->inputs([
+                        'phone' => $entity->getPhone(),
+                        'countryCode' => $entity->getCountryCode(),
+                        'source' => $entity->getSource(),
+                        'score' => $entity->getScore(),
+                        'tags' => []
+                    ])->process();
                 }
             }
         }
