@@ -208,10 +208,6 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $entity->setScore($result->getScore());
         $entity->setCountryCode($result->getCountryCode());
         $entity->setCreatedDateTime($result->getCreatedDateTime());
-
-        //$phoneScoreRepository->saveEntity($entity)->shouldBeCalled();
-        //$record = $phoneScoreRepository->getByPhoneCountryCodeAndSource($phone, 'source1', $countryCode);
-        //var_dump($record);
     }
 
 }

@@ -26,7 +26,7 @@ class SpamDetectionFacade implements ISpamDetectionFacade
         return $spamPhoneScoreRepository->getByPhoneCountryCode($phoneNumber, $countryCode) ?? [];
     }
 
-    protected function getFromDataSourceList(string $phoneNumber, string $countryCode, array $datasources = []):array
+    protected function getFromDataSourceList(string $phoneNumber, string $countryCode, array $datasources = [], $saveOnlineResults = false):array
     {
         $matchedEntities = [];
         // get matched entities from data sources
@@ -41,15 +41,17 @@ class SpamDetectionFacade implements ISpamDetectionFacade
             if($serviceResult) {
                 $matchedEntities = array_merge($matchedEntities, $serviceResult);
                 // store the result into repository
-                $phoneSpamScoreService = $this->di->make(IAddUpdatePhoneSpamScoreService::class);
-                foreach ($matchedEntities as $entity) {
-                    $phoneSpamScoreService->inputs([
-                        'phone' => $entity->getPhone(),
-                        'countryCode' => $entity->getCountryCode(),
-                        'source' => $entity->getSource(),
-                        'score' => $entity->getScore(),
-                        'tags' => []
-                    ])->process();
+                if($matchedEntities && $saveOnlineResults) {
+                    $phoneSpamScoreService = $this->di->make(IAddUpdatePhoneSpamScoreService::class);
+                    foreach ($matchedEntities as $entity) {
+                        $phoneSpamScoreService->inputs([
+                            'phone' => $entity->getPhone(),
+                            'countryCode' => $entity->getCountryCode(),
+                            'source' => $entity->getSource(),
+                            'score' => $entity->getScore(),
+                            'tags' => []
+                        ])->process();
+                    }
                 }
             }
         }
@@ -66,11 +68,11 @@ class SpamDetectionFacade implements ISpamDetectionFacade
         return null;
     }
 
-    public function detect(string $phoneNumber, string $countryCode, array $datasources = []): ?ISpamPhoneScoreEntity
+    public function detect(string $phoneNumber, string $countryCode, array $datasources = [], $saveOnlineResults = false): ?ISpamPhoneScoreEntity
     {
         $matchedEntities = array_merge(
             $this->getFromDatabase($phoneNumber, $countryCode),
-            $this->getFromDataSourceList($phoneNumber, $countryCode, $datasources)
+            $this->getFromDataSourceList($phoneNumber, $countryCode, $datasources, $saveOnlineResults)
         );
         return $this->reduce($matchedEntities);
     }

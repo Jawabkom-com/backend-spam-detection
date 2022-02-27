@@ -90,7 +90,7 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
         $this->registerMockedDigester($digester);
         $this->registerMockedDataSourceRegister($registry);
         $this->registerMockedSearchRequestRepository($searchRequestRepository);
-        $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2']);
+        $this->detect('+962788888888', 'JO', ['test_searcher_alias1', 'test_searcher_alias2'], true);
 
         $phoneScoreRepository->saveEntity(Argument::any())->shouldBeCalledTimes(2);
     }
@@ -121,6 +121,17 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
 
             return [$entity1, $entity2];
         });
+
+//        $repository->getByPhoneCountryCodeAndSource('+962788888888', 'test_searcher_alias1', 'JO')->will(function() {
+//            return null;
+//        });
+//
+//        $repository->saveEntity(Argument::any())->shouldBeCalled();
+//
+//        $repository->getByPhoneCountryCodeAndSource('+962788888888', 'test_searcher_alias2', 'JO')->will(function() {
+//            return null;
+//        });
+
         $this->wablabDi->register(ISpamPhoneScoreRepository::class, $repository->getWrappedObject());
     }
 
