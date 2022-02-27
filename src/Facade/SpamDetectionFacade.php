@@ -18,12 +18,16 @@ class SpamDetectionFacade implements ISpamDetectionFacade
         $this->di = $di;
     }
 
-    public function detect(string $phoneNumber, string $countryCode, array $datasources = []): ?ISpamPhoneScoreEntity
+    protected function getFromDatabase(string $phoneNumber, string $countryCode):array
     {
         // get matched entities from repository
         $spamPhoneScoreRepository = $this->di->make(ISpamPhoneScoreRepository::class);
-        $matchedEntities = $spamPhoneScoreRepository->getByPhoneCountryCode($phoneNumber, $countryCode);
+        return $spamPhoneScoreRepository->getByPhoneCountryCode($phoneNumber, $countryCode) ?? [];
+    }
 
+    protected function getFromDataSourceList(string $phoneNumber, string $countryCode, array $datasources = []):array
+    {
+        $matchedEntities = [];
         // get matched entities from data sources
         if($datasources) {
             $getFromDatasourceListService = $this->di->make(IGetFromDataSourceListService::class);
@@ -37,15 +41,26 @@ class SpamDetectionFacade implements ISpamDetectionFacade
                 $matchedEntities = array_merge($matchedEntities, $serviceResult);
             }
         }
+        return $matchedEntities;
+    }
 
+    protected function reduce(array $matchedEntities): ? ISpamPhoneScoreEntity
+    {
         if($matchedEntities) {
             // digest matched entities
             $entitiesDigester = $this->di->make(ISpamPhoneScoreEntitiesDigester::class);
-            $newEntity = $entitiesDigester->digest($matchedEntities);
-            return $newEntity;
+            return $entitiesDigester->digest($matchedEntities);
         }
-
         return null;
+    }
+
+    public function detect(string $phoneNumber, string $countryCode, array $datasources = []): ?ISpamPhoneScoreEntity
+    {
+        $matchedEntities = array_merge(
+            $this->getFromDatabase($phoneNumber, $countryCode),
+            $this->getFromDataSourceList($phoneNumber, $countryCode, $datasources)
+        );
+        return $this->reduce($matchedEntities);
     }
 
 }

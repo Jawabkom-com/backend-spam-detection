@@ -10,12 +10,10 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Library\ISpamPhoneScoreEntit
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISearchRequestRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
-use Jawabkom\Backend\Module\Spam\Detection\DataSourceRegistry;
 use Jawabkom\Backend\Module\Spam\Detection\Service\GetFromDataSourceListService;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySearchRequestEntity;
 use Jawabkom\Backend\Module\Spam\Detection\Test\Classes\Entity\DummySpamPhoneScoreEntity;
 use Jawabkom\Standard\Contract\IDependencyInjector;
-use phpDocumentor\Reflection\Types\Iterable_;
 use PhpSpec\ObjectBehavior;
 use PhpSpec\Wrapper\Collaborator;
 use Prophecy\Argument;
@@ -194,7 +192,6 @@ class SpamDetectionFacadeSpec extends ObjectBehavior
                 $entity->setSource('test_searcher_alias2');
                 return $entity;
             });
-
 
             return [
                 'source' => $searcher,
