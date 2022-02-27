@@ -6,5 +6,5 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity
 
 interface ISpamPhoneDataSourceToEntityMapper
 {
-    public function map(mixed $dataSourceResult):ISpamPhoneScoreEntity;
+    public function map(mixed $dataSourceResult):?ISpamPhoneScoreEntity;
 }
