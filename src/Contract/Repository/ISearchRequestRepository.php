@@ -10,5 +10,4 @@ interface ISearchRequestRepository
 
     public function getByHash(string $hash, string $status);
 
-    public function getAll();
 }

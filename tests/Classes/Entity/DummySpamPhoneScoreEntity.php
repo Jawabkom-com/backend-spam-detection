@@ -50,37 +50,37 @@ class DummySpamPhoneScoreEntity implements ISpamPhoneScoreEntity
         return $this->updated_at;
     }
 
-    public function setPhone(string $phone): void
+    public function setPhone(?string $phone): void
     {
         $this->phone = $phone;
     }
 
-    public function setSource(string $source): void
+    public function setSource(?string $source): void
     {
         $this->source = $source;
     }
 
-    public function setCountryCode(string $countryCode): void
+    public function setCountryCode(?string $countryCode): void
     {
         $this->country_code = $countryCode;
     }
 
-    public function setTags(array $tags): void
+    public function setTags(?array $tags): void
     {
         $this->tags = $tags;
     }
 
-    public function setScore(float $score): void
+    public function setScore(?float $score): void
     {
         $this->score = $score;
     }
 
-    public function setCreatedDateTime(\DateTime $dateTime): void
+    public function setCreatedDateTime(?\DateTime $dateTime): void
     {
         $this->created_at = $dateTime;
     }
 
-    public function setUpdatedDateTime(\DateTime $dateTime): void
+    public function setUpdatedDateTime(?\DateTime $dateTime): void
     {
         $this->updated_at = $dateTime;
     }

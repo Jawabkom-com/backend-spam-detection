@@ -15,7 +15,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
     private bool $is_from_cache;
     private string $status;
 
-    public function setHash(string $hash)
+    public function setHash(?string $hash)
     {
         $this->hash = $hash;
     }
@@ -25,7 +25,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         return $this->hash;
     }
     
-    public function setRequestSearchResults(array $result)
+    public function setRequestSearchResults(?array $result)
     {
         $this->request_search_results = json_encode($result);
     }
@@ -35,7 +35,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         return json_decode($this->request_search_results, true);
     }
 
-    public function setRequestDateTime(\DateTime $dateTime)
+    public function setRequestDateTime(?\DateTime $dateTime)
     {
         $this->request_date_time = $dateTime;
     }
@@ -45,7 +45,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         return $this->request_date_time;
     }
 
-    public function setResultAliasSource(string $alias)
+    public function setResultAliasSource(?string $alias)
     {
         $this->result_alias_source = $alias;
     }
@@ -55,7 +55,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         return $this->result_alias_source;
     }
 
-    public function setIsFromCache(bool $isFromCache)
+    public function setIsFromCache(?bool $isFromCache)
     {
         $this->is_from_cache = $isFromCache;
     }
@@ -65,7 +65,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         return $this->is_from_cache;
     }
 
-    public function setStatus(string $status)
+    public function setStatus(?string $status)
     {
         $this->status = $status;
     }
@@ -75,7 +75,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         return $this->status;
     }
 
-    public function setRequestSearchFilters(array $request)
+    public function setRequestSearchFilters(?array $request)
     {
         // TODO: Implement setRequestSearchFilters() method.
     }
@@ -85,7 +85,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         // TODO: Implement getRequestSearchFilters() method.
     }
 
-    public function setOtherParams(array $params)
+    public function setOtherParams(?array $params)
     {
         // TODO: Implement setOtherParams() method.
     }
@@ -95,7 +95,7 @@ class DummySearchRequestEntity implements ISearchRequestEntity
         // TODO: Implement getOtherParams() method.
     }
 
-    public function setMatchesCount(int $count)
+    public function setMatchesCount(?int $count)
     {
         // TODO: Implement setMatchesCount() method.
     }

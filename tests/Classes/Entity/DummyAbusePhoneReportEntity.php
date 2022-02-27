@@ -40,27 +40,27 @@ class DummyAbusePhoneReportEntity implements IAbusePhoneReportEntity
         return $this->tags;
     }
 
-    public function setReporterId(string $reporterId): void
+    public function setReporterId(?string $reporterId): void
     {
         $this->reporterId = $reporterId;
     }
 
-    public function setAbuseType(string $type): void
+    public function setAbuseType(?string $type): void
     {
         $this->abuseType = $type;
     }
 
-    public function setPhone(string $phone): void
+    public function setPhone(?string $phone): void
     {
         $this->phone = $phone;
     }
 
-    public function setPhoneCountryCode(string $phoneCountryCode): void
+    public function setPhoneCountryCode(?string $phoneCountryCode): void
     {
         $this->phoneCountryCode = $phoneCountryCode;
     }
 
-    public function setTags(array $tags): void
+    public function setTags(?array $tags): void
     {
         $this->tags = $tags;
     }
@@ -75,12 +75,12 @@ class DummyAbusePhoneReportEntity implements IAbusePhoneReportEntity
         return $this->updatedDateTime;
     }
 
-    public function setCreatedDateTime(\DateTime $dateTime): void
+    public function setCreatedDateTime(?\DateTime $dateTime): void
     {
         $this->createdDateTime = $dateTime;
     }
 
-    public function setUpdatedDateTime(\DateTime $dateTime): void
+    public function setUpdatedDateTime(?\DateTime $dateTime): void
     {
         $this->updatedDateTime = $dateTime;
     }
