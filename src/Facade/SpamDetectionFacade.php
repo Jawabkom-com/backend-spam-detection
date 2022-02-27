@@ -6,6 +6,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Entity\ISpamPhoneScoreEntity
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Facade\ISpamDetectionFacade;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Library\ISpamPhoneScoreEntitiesDigester;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
+use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IAddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 
@@ -39,6 +40,14 @@ class SpamDetectionFacade implements ISpamDetectionFacade
                 ->output('result');
             if($serviceResult) {
                 $matchedEntities = array_merge($matchedEntities, $serviceResult);
+                // store the result into repository
+                $phoneSpamScoreService = $this->di->make(IAddUpdatePhoneSpamScoreService::class);
+                foreach ($matchedEntities as $entity) {
+                    print_r($entity->getPhone());
+//                    $phoneSpamScoreService->inputs([
+//                        'phone' => $entity->getPhone()
+//                    ])->process();
+                }
             }
         }
         return $matchedEntities;
