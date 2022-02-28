@@ -8,6 +8,7 @@ use Jawabkom\Backend\Module\Spam\Detection\Contract\Library\ISpamPhoneScoreEntit
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Repository\ISpamPhoneScoreRepository;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IAddUpdatePhoneSpamScoreService;
 use Jawabkom\Backend\Module\Spam\Detection\Contract\Service\IGetFromDataSourceListService;
+use Jawabkom\Backend\Module\Spam\Detection\Library\Phone;
 use Jawabkom\Standard\Contract\IDependencyInjector;
 
 class SpamDetectionFacade implements ISpamDetectionFacade
@@ -70,9 +71,13 @@ class SpamDetectionFacade implements ISpamDetectionFacade
 
     public function detect(string $phoneNumber, string $countryCode, array $datasources = [], $saveOnlineResults = false): ?ISpamPhoneScoreEntity
     {
+        $phoneLib = new Phone();
+        $parsedPhone = $phoneLib->parse($phoneNumber, [$countryCode]);
+        $normalizedPhone = $parsedPhone['phone'];
+        $countryCode = $parsedPhone['country_code'] ?? $countryCode;
         $matchedEntities = array_merge(
-            $this->getFromDatabase($phoneNumber, $countryCode),
-            $this->getFromDataSourceList($phoneNumber, $countryCode, $datasources, $saveOnlineResults)
+            $this->getFromDatabase($normalizedPhone, $countryCode),
+            $this->getFromDataSourceList($normalizedPhone, $countryCode, $datasources, $saveOnlineResults)
         );
         return $this->reduce($matchedEntities);
     }
