@@ -86,7 +86,8 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
                 $this->searchRequests[$alias]->addError($this->errorsByAliases[$alias]);
                 $this->searchRequests[$alias]->setStatus('error');
             } else {
-                continue;
+                $this->searchRequests[$alias]->setMatchesCount(0);
+                $this->searchRequests[$alias]->setStatus('done');
             }
 
             $this->searchRequestRepository->saveEntity($this->searchRequests[$alias]);
@@ -150,7 +151,8 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     {
         foreach ($this->searchResultsByAlias as $alias => $result) {
             $registryObject = $this->dataSourceRegistry->getRegistry($alias);
-            $this->mappedSearchResults[] = $registryObject['mapper']->map($result);
+            if($result)
+                $this->mappedSearchResults[] = $registryObject['mapper']->map($result);
         }
         return $this;
     }
