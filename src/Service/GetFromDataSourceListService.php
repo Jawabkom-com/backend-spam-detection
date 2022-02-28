@@ -86,7 +86,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
                 $this->searchRequests[$alias]->addError($this->errorsByAliases[$alias]);
                 $this->searchRequests[$alias]->setStatus('error');
             } else {
-                throw new \Exception('No error nor result could be found for alias '.$alias);
+                continue;
             }
 
             $this->searchRequestRepository->saveEntity($this->searchRequests[$alias]);
