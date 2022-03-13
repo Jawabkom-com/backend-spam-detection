@@ -71,9 +71,9 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
      */
     private function validateInputs($phone, $source, $score)
     {
-        if($phone == null) throw new RequiredPhoneException();
-        if($source == null) throw new RequiredSourceException();
-        if($score == null) throw new RequiredScoreException();
+        if(!$phone) throw new RequiredPhoneException();
+        if(!$source) throw new RequiredSourceException();
+        if(!isset($score)) throw new RequiredScoreException();
     }
 
     /**

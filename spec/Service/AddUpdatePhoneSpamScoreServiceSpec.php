@@ -51,6 +51,19 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
         $result->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
     }
 
+    function it_should_create_phone_spam_record_if_zero_score_input_provided()
+    {
+        $result = $this->inputs([
+            'phone' => '+970599189357',
+            'score' => 0,
+            'source' => 'test',
+            'countryCode' => 'PS',
+            'tags' => []
+        ])->process()->output('result');
+
+        $result->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+    }
+
     function it_should_throw_exception_if_data_not_provided()
     {
         $this->inputs([
