@@ -75,6 +75,7 @@ class AddUpdatePhoneSpamScoreServiceSpec extends ObjectBehavior
         ])->process()->output('result');
 
         $result->shouldBeAnInstanceOf(ISpamPhoneScoreEntity::class);
+        $result->getTags()->shouldBeNull();
     }
 
     function it_should_throw_exception_if_data_not_provided()

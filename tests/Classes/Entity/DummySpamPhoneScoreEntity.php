@@ -30,7 +30,7 @@ class DummySpamPhoneScoreEntity implements ISpamPhoneScoreEntity
         return $this->country_code;
     }
 
-    public function getTags(): array
+    public function getTags(): ?array
     {
         return $this->tags;
     }
