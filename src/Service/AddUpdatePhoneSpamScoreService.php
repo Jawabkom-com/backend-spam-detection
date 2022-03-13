@@ -85,8 +85,10 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
         $score = trim($score);
         $source = trim($source);
 
-        foreach ($tags as &$tag) {
-            $tag = trim($tag);
+        if($tags) {
+            foreach ($tags as &$tag) {
+                $tag = trim($tag);
+            }
         }
     }
 
