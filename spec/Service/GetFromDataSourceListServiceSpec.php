@@ -210,4 +210,86 @@ class GetFromDataSourceListServiceSpec extends ObjectBehavior
         $entity->setCreatedDateTime($result->getCreatedDateTime());
     }
 
+    public function it_should_get_new_results_for_data_source_if_ttl_is_expired()
+    {
+        $searchAliases = ['source1'];
+        $phone = '+970599189357';
+        $countryCode = 'PS';
+
+        $result = $this->inputs([
+            'searchAliases' => $searchAliases,
+            'phone' => $phone,
+            'countryCode' => $countryCode
+        ])->process()->output('search_requests');
+
+        $newEntity = $result->offsetGet('source1')->getWrappedObject();
+
+        $repo = new DummySearchRequestRepository();
+        $entity = new DummySearchRequestEntity();
+        $record = $repo->getByHash($newEntity->getHash(), 'init');
+        $inserted = $record[0];
+        $hash = $inserted->getHash();
+        $requestSearchResult = $inserted->getRequestSearchResults();
+        $createdDate = $inserted->getRequestDateTime();
+        $updatedDate = $createdDate->sub(new \DateInterval('P1D'));
+        $entity->setIsFromCache(true);
+        $entity->setRequestSearchResults($requestSearchResult);
+        $entity->setResultAliasSource('source1');
+        $entity->setStatus('done');
+        $entity->setRequestDateTime($updatedDate);
+        $entity->setHash($hash);
+        $repo->saveEntity($entity);
+
+        $this->inputs([
+            'searchAliases' => $searchAliases,
+            'phone' => $phone,
+            'countryCode' => $countryCode
+        ])->process()->output('search_requests')->offsetGet('source1')->getIsFromCache()->shouldBe(false);
+    }
+
+    public function it_should_get_results_from_cache_if_ttl_is_expired()
+    {
+        $searchAliases = ['source1'];
+        $phone = '+970599189357';
+        $countryCode = 'PS';
+
+        $result = $this->inputs([
+            'searchAliases' => $searchAliases,
+            'phone' => $phone,
+            'countryCode' => $countryCode
+        ])->process()->output('search_requests');
+
+        $newEntity = $result->offsetGet('source1')->getWrappedObject();
+
+        $repo = new DummySearchRequestRepository();
+        $entity = new DummySearchRequestEntity();
+        $record = $repo->getByHash($newEntity->getHash(), 'init');
+        $inserted = $record[0];
+        $hash = $inserted->getHash();
+        $requestSearchResult = $inserted->getRequestSearchResults();
+        $createdDate = $inserted->getRequestDateTime();
+        $updatedDate = $createdDate->sub(new \DateInterval('P1D'));
+        $entity->setIsFromCache(true);
+        $entity->setRequestSearchResults($requestSearchResult);
+        $entity->setResultAliasSource('source1');
+        $entity->setStatus('done');
+        $entity->setRequestDateTime($updatedDate);
+        $entity->setHash($hash);
+        $repo->saveEntity($entity);
+
+        $this->inputs([
+            'searchAliases' => $searchAliases,
+            'phone' => $phone,
+            'countryCode' => $countryCode
+        ])->process()->output('search_requests')->offsetGet('source1')->getIsFromCache()->shouldBe(false);
+
+        $this->inputs([
+            'searchAliases' => $searchAliases,
+            'phone' => $phone,
+            'countryCode' => $countryCode
+        ])->process()->output('search_requests')->offsetGet('source1')->getIsFromCache()->shouldBe(true);
+
+    }
+
+
 }

@@ -19,9 +19,9 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     private IDataSourceRegistry $dataSourceRegistry;
     private ISearchRequestRepository $searchRequestRepository;
 
-    protected array $inputAllowedKeys = ['searchAliases', 'phone', 'countryCode'];
-    protected string $searchHashGroup = '';
-    protected array $cachedResultsByAliases = [];
+    protected array  $inputAllowedKeys   = ['searchAliases', 'phone', 'countryCode'];
+    protected string $searchHashGroup    = '';
+    protected array  $cachedResultsByAliases = [];
     protected string $normalizedPhoneNumber;
     protected array $searchResultsByAlias = [];
     /**
@@ -167,8 +167,16 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
     {
         $cachedResults = $this->searchRequestRepository->getByHash($this->searchHashGroup, 'done');
         if ($cachedResults) {
+            $currentTime = new \DateTime(date('Y-m-d H:i:s'));
             foreach ($cachedResults as $cachedResult) {
-                $this->cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
+                $registryObject = $this->dataSourceRegistry->getRegistry($cachedResult->getResultAliasSource());
+                $sourceObject = $registryObject['source'];
+                $ttl = $sourceObject->getTTLSeconds();
+                $requestTime = $cachedResult->getRequestDateTime();
+                $lastFetchPlusTTl = $requestTime->add(new \DateInterval("PT{$ttl}S"));
+                if($currentTime < $lastFetchPlusTTl) {
+                    $this->cachedResultsByAliases[$cachedResult->getResultAliasSource()] = $cachedResult->getRequestSearchResults();
+                } else unset($this->cachedResultsByAliases[$cachedResult->getResultAliasSource()]);
             }
         }
         return $this;
