@@ -9,6 +9,7 @@ interface ISpamPhoneScoreEntity
     public function getCountryCode():?string;
     public function getTags():?array;
     public function getScore():?float;
+    public function getMeta():?array;
     public function getCreatedDateTime():?\DateTime;
     public function getUpdatedDateTime():?\DateTime;
 
@@ -17,6 +18,7 @@ interface ISpamPhoneScoreEntity
     public function setCountryCode(?string $countryCode):void;
     public function setTags(?array $tags):void;
     public function setScore(?float $score):void;
+    public function setMeta(?array $meta):void;
     public function setCreatedDateTime(?\DateTime $dateTime):void;
     public function setUpdatedDateTime(?\DateTime $dateTime):void;
 }

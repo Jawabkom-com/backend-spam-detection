@@ -35,13 +35,14 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
 
         $phone          = $this->getInput('phone');
         $source         = $this->getInput('source');
-        $countryCode   = $this->getInput('countryCode');
+        $countryCode    = $this->getInput('countryCode');
         $score          = $this->getInput('score');
         $tags           = $this->getInput('tags');
+        $meta           = $this->getInput('meta', []);
 
         $this->validateInputs($phone, $source, $score);
 
-        $this->filterInputs($phone, $source, $countryCode, $score, $tags);
+        $this->filterInputs($phone, $source, $countryCode, $score, $tags, $meta);
 
         $phoneEntity = $phoneRepo->getByPhoneCountryCodeAndSource($phone, $source, $countryCode);
 
@@ -56,6 +57,7 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
         }
         $phoneEntity->setScore($score);
         $phoneEntity->setTags($tags);
+        $phoneEntity->setMeta($meta);
 
         $phoneRepo->saveEntity($phoneEntity);
 
@@ -79,11 +81,12 @@ class AddUpdatePhoneSpamScoreService extends AbstractService implements IAddUpda
     /**
      * @throws RequiredCountryCodeException
      */
-    private function filterInputs(&$phone, &$source, &$countryCode, &$score, &$tags)
+    private function filterInputs(&$phone, &$source, &$countryCode, &$score, &$tags, &$meta)
     {
         $this->filterPhoneAndCountryCode($phone, $countryCode);
         $score = trim($score);
         $source = trim($source);
+        $meta = (array)$meta;
 
         if($tags) {
             foreach ($tags as &$tag) {

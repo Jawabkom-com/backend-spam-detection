@@ -44,16 +44,7 @@ class SpamDetectionFacade implements ISpamDetectionFacade
                 $matchedEntities = array_merge($matchedEntities, $serviceResult);
                 // store the result into repository
                 if($matchedEntities && $saveOnlineResults) {
-                    $phoneSpamScoreService = $this->di->make(IAddUpdatePhoneSpamScoreService::class);
-                    foreach ($matchedEntities as $entity) {
-                        $phoneSpamScoreService->inputs([
-                            'phone' => $entity->getPhone(),
-                            'countryCode' => $entity->getCountryCode(),
-                            'source' => $entity->getSource(),
-                            'score' => $entity->getScore(),
-                            'tags' => []
-                        ])->process();
-                    }
+                    $this->saveMatchedScoreEntities($matchedEntities);
                 }
             }
         }
@@ -96,6 +87,21 @@ class SpamDetectionFacade implements ISpamDetectionFacade
                 'data_source' => $datasource,
                 'save_result' => $saveOnlineResults
             ]);
+        }
+    }
+
+    protected function saveMatchedScoreEntities(array $matchedEntities): void
+    {
+        $phoneSpamScoreService = $this->di->make(IAddUpdatePhoneSpamScoreService::class);
+        foreach ($matchedEntities as $entity) {
+            $phoneSpamScoreService->inputs([
+                'phone' => $entity->getPhone(),
+                'countryCode' => $entity->getCountryCode(),
+                'source' => $entity->getSource(),
+                'score' => $entity->getScore(),
+                'tags' => $entity->getTags(),
+                'meta' => $entity->getMeta()
+            ])->process();
         }
     }
 

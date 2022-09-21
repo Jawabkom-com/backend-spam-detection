@@ -10,10 +10,11 @@ class DummySpamPhoneScoreEntity implements ISpamPhoneScoreEntity
     private $phone;
     private $source;
     private $country_code;
-    private $tags;
+    private $tags = [];
     private $score;
     private $created_at;
     private $updated_at;
+    private $meta = [];
 
     public function getPhone(): string
     {
@@ -83,5 +84,15 @@ class DummySpamPhoneScoreEntity implements ISpamPhoneScoreEntity
     public function setUpdatedDateTime(?\DateTime $dateTime): void
     {
         $this->updated_at = $dateTime;
+    }
+
+    public function getMeta(): ?array
+    {
+        return $this->meta;
+    }
+
+    public function setMeta(?array $meta): void
+    {
+        $this->meta = $meta;
     }
 }
