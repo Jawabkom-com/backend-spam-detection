@@ -125,7 +125,7 @@ class GetFromDataSourceListService extends AbstractService implements IGetFromDa
                     $sourceObject = $registryObject['source'];
                     $this->searchResultsByAlias[$alias] = $sourceObject->getByPhone($this->normalizedPhoneNumber, $this->getInput('countryCode'));
                 } catch (\Throwable $exception) {
-                    $this->errorsByAliases[$alias] = $exception->getMessage();
+                    $this->errorsByAliases[$alias] = "FILE: {$exception->getFile()}, LINE: {$exception->getLine()}, ERROR: {$exception->getMessage()}";
                 }
             }
         }
